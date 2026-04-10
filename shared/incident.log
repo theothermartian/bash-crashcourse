@@ -1,0 +1,81 @@
+Apr  9 02:45:12 db-prod kernel: [12345.678901] Memory: 8192000K/16384000K available (6144K kernel code, 1024K rwdata, 2048K rodata, 512K init)
+Apr  9 02:46:03 db-prod systemd[1]: Starting Daily apt download activities...
+Apr  9 02:47:15 db-prod CRON[2156]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+Apr  9 02:47:42 db-prod sshd[2234]: Accepted publickey for ubuntu from 10.0.1.45 port 52344 ssh2: RSA SHA256:abc1234567890def
+Apr  9 02:48:01 db-prod sshd[2235]: pam_unix(sshd:session): session opened for user ubuntu by (uid=0)
+Apr  9 02:49:30 db-prod postgres[3421]: [2-1] user=admin,db=production LOG:  checkpoint starting: time
+Apr  9 02:50:01 db-prod postgres[3421]: [2-2] user=admin,db=production LOG:  checkpoint complete: wrote 1256 buffers (5.2%); total time=31421 ms; sync time=12456 ms; write time=18965 ms
+Apr  9 02:51:15 db-prod postgres[3450]: [3-1] user=app,db=production LOG:  autovacuum launcher started
+Apr  9 02:52:45 db-prod postgres[3451]: [4-1] user=app,db=production LOG:  autovacuum: ANALYZE public.users (to prevent wraparound)
+Apr  9 02:54:22 db-prod postgres[3451]: [4-2] user=app,db=production LOG:  autovacuum: ANALYZE public.transactions (to prevent wraparound) took 45123 ms
+Apr  9 02:56:00 db-prod sshd[2456]: Received disconnect from 10.0.1.45 port 52344
+Apr  9 02:58:30 db-prod postgres[3421]: [5-1] user=admin,db=production LOG:  checkpoint starting: time
+Apr  9 02:59:15 db-prod postgres[3421]: [5-2] user=admin,db=production LOG:  checkpoint complete: wrote 923 buffers (3.8%); total time=45123 ms; sync time=18456 ms; write time=26667 ms
+Apr  9 03:00:02 db-prod postgres[3550]: [6-1] FATAL:  remaining connection slots are reserved for non-replication superuser connections
+Apr  9 03:00:03 db-prod app[4100]: [ERROR] Failed to get database connection: FATAL: remaining connection slots are reserved for non-replication superuser connections (error_code=1001)
+Apr  9 03:00:04 db-prod app[4100]: [ERROR] Connection pool exhausted, retrying attempt 1/3
+Apr  9 03:00:05 db-prod app[4100]: [ERROR] Cannot connect to database: FATAL: remaining connection slots are reserved for non-replication superuser connections
+Apr  9 03:00:06 db-prod sshd[4200]: Invalid user admin from 192.168.1.200 port 54321
+Apr  9 03:00:06 db-prod sshd[4200]: Failed password for invalid user admin from 192.168.1.200 port 54321 ssh2
+Apr  9 03:00:07 db-prod app[4100]: [CRITICAL] Database service unavailable, health check failed
+Apr  9 03:00:07 db-prod sshd[4201]: Invalid user root from 192.168.1.200 port 54322
+Apr  9 03:00:07 db-prod sshd[4201]: Failed password for invalid user root from 192.168.1.200 port 54322 ssh2
+Apr  9 03:00:08 db-prod app[4100]: [ERROR] Attempt 2/3 to reconnect to database...
+Apr  9 03:00:08 db-prod sshd[4202]: Invalid user postgres from 192.168.1.200 port 54323
+Apr  9 03:00:08 db-prod sshd[4202]: Failed password for invalid user postgres from 192.168.1.200 port 54323 ssh2
+Apr  9 03:00:09 db-prod postgres[3551]: [7-1] ERROR:  deadlock detected
+Apr  9 03:00:09 db-prod postgres[3551]: [7-2] DETAIL:  Process 3551 waits for ShareLock on transaction 1A3B56C0; blocked by process 3552.
+Apr  9 03:00:09 db-prod sshd[4203]: Invalid user ops from 192.168.1.200 port 54324
+Apr  9 03:00:09 db-prod sshd[4203]: Failed password for invalid user ops from 192.168.1.200 port 54324 ssh2
+Apr  9 03:00:10 db-prod app[4100]: [ERROR] Attempt 3/3 to reconnect to database...
+Apr  9 03:00:10 db-prod postgres[3552]: [8-1] ERROR:  deadlock detected
+Apr  9 03:00:10 db-prod postgres[3552]: [8-2] DETAIL:  Process 3552 waits for ShareLock on transaction 1A3B56D1; blocked by process 3551.
+Apr  9 03:00:11 db-prod kernel: [12356.234567] Out of memory: Kill process 3451 (postgres) score 523 or sacrifice child
+Apr  9 03:00:11 db-prod kernel: [12356.234568] Killed process 3451 (postgres) total-vm:2048576kB, anon-rss:1834566kB, file-rss:0kB, shmem-rss:0kB
+Apr  9 03:00:11 db-prod sshd[4204]: Invalid user admin from 192.168.1.200 port 54325
+Apr  9 03:00:11 db-prod sshd[4204]: Failed password for invalid user admin from 192.168.1.200 port 54325 ssh2
+Apr  9 03:00:12 db-prod postgres[3421]: [9-1] LOG:  server process (PID 3451) was terminated by signal 9: Killed
+Apr  9 03:00:12 db-prod sshd[4205]: Invalid user root from 192.168.1.200 port 54326
+Apr  9 03:00:12 db-prod sshd[4205]: Failed password for invalid user root from 192.168.1.200 port 54326 ssh2
+Apr  9 03:00:13 db-prod postgres[3421]: [10-1] LOG:  terminating any other active server processes
+Apr  9 03:00:13 db-prod postgres[3421]: [10-2] LOG:  abnormal database system shutdown
+Apr  9 03:00:14 db-prod systemd[1]: postgresql.service: Main process exited, code=exited, status=1/FAILURE
+Apr  9 03:00:14 db-prod postgres[3421]: [11-1] LOG:  database system is shut down
+Apr  9 03:00:14 db-prod systemd[1]: postgresql.service: Unit entered failed state.
+Apr  9 03:00:14 db-prod systemd[1]: postgresql.service: Failed with result 'exit-code'.
+Apr  9 03:00:15 db-prod monitoring[5100]: [CRITICAL] postgres health check failed - connection refused
+Apr  9 03:00:15 db-prod app[4100]: [CRITICAL] Giving up on database reconnection after 3 failed attempts
+Apr  9 03:00:16 db-prod sshd[4206]: Invalid user postgres from 192.168.1.200 port 54327
+Apr  9 03:00:16 db-prod sshd[4206]: Failed password for invalid user postgres from 192.168.1.200 port 54327 ssh2
+Apr  9 03:00:17 db-prod monitoring[5100]: [ERROR] Service postgres marked as DOWN
+Apr  9 03:00:17 db-prod sshd[4207]: Invalid user ops from 192.168.1.200 port 54328
+Apr  9 03:00:17 db-prod sshd[4207]: Failed password for invalid user ops from 192.168.1.200 port 54328 ssh2
+Apr  9 03:00:21 db-prod sshd[4208]: Received disconnect from 192.168.1.200 port 54328: Too many authentication failures [preauth]
+Apr  9 03:00:22 db-prod postgres[3600]: [12-1] LOG:  database system was interrupted; last known up at 2026-04-09 03:00:01 UTC
+Apr  9 03:00:23 db-prod postgres[3600]: [12-2] LOG:  database system was not properly shut down; automatic recovery in progress
+Apr  9 03:00:24 db-prod postgres[3600]: [12-3] LOG:  redo starts at 0/1A3B5600
+Apr  9 03:00:26 db-prod postgres[3600]: [12-4] LOG:  redo in progress at 0/1A3B56C0
+Apr  9 03:00:28 db-prod postgres[3600]: [12-5] LOG:  consistent recovery state reached at 0/1A3B5700
+Apr  9 03:01:02 db-prod app[4100]: [ERROR] Database connection still unavailable
+Apr  9 03:01:15 db-prod monitoring[5100]: [CRITICAL] postgres not responding to health checks
+Apr  9 03:01:30 db-prod app[4100]: [ERROR] Health check endpoint /health returned 503 Service Unavailable
+Apr  9 03:02:00 db-prod app[4100]: [ERROR] Retrying database connection...
+Apr  9 03:02:45 db-prod monitoring[5100]: [ERROR] Timeout waiting for postgres startup
+Apr  9 03:03:15 db-prod app[4100]: [CRITICAL] Application in degraded mode - no database connection
+Apr  9 03:03:45 db-prod postgres[3600]: [13-1] LOG:  MultiXactId wrap limit is 2147483647
+Apr  9 03:04:00 db-prod app[4100]: [ERROR] Cannot execute query - no connection to database
+Apr  9 03:04:30 db-prod monitoring[5100]: [ERROR] Still waiting for postgres to stabilize
+Apr  9 03:05:00 db-prod postgres[3600]: [14-1] LOG:  database system is ready to accept connections
+Apr  9 03:05:01 db-prod systemd[1]: postgresql.service: Unit entered running state.
+Apr  9 03:05:02 db-prod postgres[3600]: [14-2] LOG:  checkpoint starting: force wait
+Apr  9 03:05:04 db-prod postgres[3600]: [14-3] LOG:  checkpoint complete: wrote 45 buffers (0.2%); total time=2123 ms
+Apr  9 03:05:05 db-prod monitoring[5100]: [INFO] postgres health check passed - connection established
+Apr  9 03:05:06 db-prod app[4100]: [INFO] Successfully reconnected to database
+Apr  9 03:05:07 db-prod app[4100]: [INFO] Resuming normal operation
+Apr  9 03:05:08 db-prod monitoring[5100]: [INFO] postgres service marked as UP
+Apr  9 03:05:10 db-prod postgres[3600]: [15-1] LOG:  autovacuum launcher started
+Apr  9 03:10:00 db-prod postgres[3600]: [16-1] LOG:  checkpoint starting: time
+Apr  9 03:10:45 db-prod postgres[3600]: [16-2] LOG:  checkpoint complete: wrote 234 buffers (1.0%); total time=45123 ms
+Apr  9 03:12:15 db-prod app[4100]: [INFO] Processing transactions normally
+Apr  9 03:14:30 db-prod sshd[4500]: Accepted publickey for ubuntu from 10.0.1.50 port 52789 ssh2: RSA SHA256:def9876543210abc
+Apr  9 03:15:00 db-prod postgres[3600]: [17-1] LOG:  autovacuum: ANALYZE public.sessions (to prevent wraparound)
