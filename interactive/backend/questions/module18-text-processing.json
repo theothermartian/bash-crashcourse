@@ -27,7 +27,7 @@
       "description": "sed 's/old/new/g' substitutes all occurrences on each line (g = global). Without g, only the first match per line. sed -i edits in place. Always cp file.bak first before using -i in production.",
       "use_cases": ["Fix typos or terminology changes in config files", "Normalise log formats for processing", "Remove or replace specific strings in files"],
       "hints": ["sed 's/OLD/NEW/g' for global replacement", "Print to stdout (no -i)", "Run: sed 's/ERROR/CRITICAL/g' /home/student/logs/app.log | head -5"],
-      "validation": { "type": "output_contains", "command": "sed 's/ERROR/CRITICAL/g' /home/student/logs/app.log", "substring": "CRITICAL" }
+      "validation": { "type": "output_match", "pattern": "[0-9]{4}.*CRITICAL" }
     },
     {
       "id": "m18-q04",
@@ -54,7 +54,7 @@
       "description": "The frequency idiom: grep to extract, sort to group, uniq -c to count consecutive duplicates, sort -rn to rank by count descending. You'll use this combination almost daily as a sysadmin.",
       "use_cases": ["Find most common errors in a log", "Rank most active users in access logs", "Identify most frequent commands in history"],
       "hints": ["grep -oE extracts only the matched text", "Pipe into sort | uniq -c | sort -rn", "Run: grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn"],
-      "validation": { "type": "output_contains", "command": "grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn", "substring": "INFO" }
+      "validation": { "type": "output_match", "pattern": "^\\s*[0-9]+\\s+INFO", "flags": "m" }
     }
   ]
 }

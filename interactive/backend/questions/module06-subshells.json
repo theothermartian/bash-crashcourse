@@ -27,7 +27,7 @@
       "description": "cd inside a subshell only changes the working directory for that child process. The parent shell is completely unaffected. This is the cleanest way to run commands in a different directory temporarily.",
       "use_cases": ["Run a build command in a specific directory without affecting caller", "Execute scripts that expect a certain CWD", "Keep working directory clean in deploy scripts"],
       "hints": ["Run cd /tmp inside ()", "pwd inside the subshell shows /tmp", "Run: (cd /tmp && pwd) && pwd"],
-      "validation": { "type": "output_contains", "command": "(cd /tmp && pwd) && pwd", "substring": "/tmp" }
+      "validation": { "type": "output_contains", "substring": "/home/student" }
     },
     {
       "id": "m06-q04",

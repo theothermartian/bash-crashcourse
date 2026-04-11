@@ -9,7 +9,7 @@
       "description": "${var:-default} returns the variable's value if set and non-empty, or the default otherwise. The variable is NOT assigned — it's just a safe read. Use ${var:=default} if you want assignment.",
       "use_cases": ["Safe defaults for optional env vars", "Fallback paths in deploy scripts", "Default values for script arguments"],
       "hints": ["Syntax: ${VARNAME:-default_value}", "CONFIG_DIR is not set, so the default fires", "Run: echo ${CONFIG_DIR:-/etc/reactor}"],
-      "validation": { "type": "output_match", "command": "echo ${CONFIG_DIR:-/etc/reactor}", "pattern": "/etc/reactor" }
+      "validation": { "type": "output_match", "pattern": "^/etc/reactor$" }
     },
     {
       "id": "m09-q02",

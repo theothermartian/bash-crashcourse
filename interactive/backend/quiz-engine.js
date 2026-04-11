@@ -102,16 +102,18 @@ class QuizEngine {
 // Validation runner
 // ---------------------------------------------------------------------------
 
+function shellEscape(str) {
+  return "'" + String(str).replace(/'/g, "'\\''") + "'";
+}
+
 async function runCheck(container, studentCmd, v) {
   switch (v.type) {
     case 'output_match': {
-      const cmd = v.command || studentCmd;
-      const { stdout } = await execCheck(container, cmd);
+      const { stdout } = await execCheck(container, studentCmd);
       return new RegExp(v.pattern, v.flags || '').test(stdout);
     }
     case 'output_contains': {
-      const cmd = v.command || studentCmd;
-      const { stdout } = await execCheck(container, cmd);
+      const { stdout } = await execCheck(container, studentCmd);
       return stdout.includes(v.substring);
     }
     case 'exit_code': {
@@ -121,15 +123,15 @@ async function runCheck(container, studentCmd, v) {
       return exitCode === (v.expected ?? 0);
     }
     case 'file_exists': {
-      const { stdout } = await execCheck(container, `test -e "${v.path}" && echo OK`);
+      const { stdout } = await execCheck(container, `test -e ${shellEscape(v.path)} && echo OK`);
       return stdout === 'OK';
     }
     case 'file_not_empty': {
-      const { stdout } = await execCheck(container, `test -s "${v.path}" && echo OK`);
+      const { stdout } = await execCheck(container, `test -s ${shellEscape(v.path)} && echo OK`);
       return stdout === 'OK';
     }
     case 'file_contains': {
-      const { stdout } = await execCheck(container, `grep -q "${v.pattern}" "${v.path}" && echo OK`);
+      const { stdout } = await execCheck(container, `grep -q ${shellEscape(v.pattern)} ${shellEscape(v.path)} && echo OK`);
       return stdout === 'OK';
     }
     case 'multi': {

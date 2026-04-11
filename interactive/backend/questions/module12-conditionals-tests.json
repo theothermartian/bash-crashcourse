@@ -27,7 +27,7 @@
       "description": "-z tests for an empty (zero-length) string. -n tests for non-empty. These are the standard string emptiness checks. Always quote the variable: [[ -z \"$var\" ]] not [[ -z $var ]].",
       "use_cases": ["Validate required script arguments", "Check that a variable was set before use", "Guard against empty database query results"],
       "hints": ["-z means 'zero length' — true if empty", "Set SERVICE='' first", "Run: SERVICE='' && [[ -z \"$SERVICE\" ]] && echo 'WARNING: SERVICE is empty'"],
-      "validation": { "type": "output_match", "command": "SERVICE='' && [[ -z \"$SERVICE\" ]] && echo 'WARNING: SERVICE is empty'", "pattern": "WARNING" }
+      "validation": { "type": "output_match", "pattern": "WARNING:.*SERVICE" }
     },
     {
       "id": "m12-q04",

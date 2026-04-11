@@ -27,7 +27,7 @@
       "description": "wc expects a filename or stdin. <(cmd) gives wc a virtual filename backed by the command's output. Alternative to ls /home/student | wc -l, but useful when you need to pass the output to a command that only accepts filenames.",
       "use_cases": ["Count lines in a command's output when piping isn't possible", "Pass command output to tools that only accept file arguments", "Measure output size without temp files"],
       "hints": ["wc -l can take a filename or stdin", "Wrap the command in <()", "Run: wc -l <(ls /home/student)"],
-      "validation": { "type": "output_match", "command": "wc -l <(ls /home/student)", "pattern": "[0-9]+" }
+      "validation": { "type": "output_match", "pattern": "^\\s*[0-9]+" }
     },
     {
       "id": "m05-q04",

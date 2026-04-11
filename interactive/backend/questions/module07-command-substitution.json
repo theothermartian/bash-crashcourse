@@ -27,7 +27,7 @@
       "description": "$() can be nested: $(outer $(inner)). The inner substitution runs first. Backticks cannot be nested cleanly — another reason to always use $(). Nested substitutions are common in dynamic filename generation.",
       "use_cases": ["Generate unique filenames per user per date", "Build complex strings from multiple runtime values", "Create archive names that include environment information"],
       "hints": ["Nest two $() calls inside a string", "$(whoami) gets the user, $(date +%Y%m%d) gets the date", "Run: echo \"backup-$(whoami)-$(date +%Y%m%d).sql\""],
-      "validation": { "type": "output_match", "command": "echo \"backup-$(whoami)-$(date +%Y%m%d).sql\"", "pattern": "backup-.+-.+\\.sql" }
+      "validation": { "type": "output_match", "pattern": "backup-[a-z]+-[0-9]{8}\\.sql" }
     },
     {
       "id": "m07-q04",

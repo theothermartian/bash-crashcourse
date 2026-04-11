@@ -9,7 +9,7 @@
       "description": "Appending & to a command runs it as a background job. The shell prints [job_number] PID and returns the prompt immediately. The job's stdout still goes to the terminal unless redirected. $! holds the PID of the last background job.",
       "use_cases": ["Run long backups without blocking the terminal", "Start multiple parallel processes", "Fire-and-forget monitoring tasks"],
       "hints": ["Append & to send to background", "Then run jobs to see it", "Run: sleep 5 & jobs"],
-      "validation": { "type": "output_match", "command": "sleep 10 & jobs", "pattern": "\\[1\\]" }
+      "validation": { "type": "output_match", "pattern": "\\[1\\].*sleep" }
     },
     {
       "id": "m19-q02",
@@ -45,7 +45,7 @@
       "description": "jobs lists active background jobs with their number [N], status, and command. kill %N kills job N by job number (not PID). %% refers to the most recently started job. jobs -l includes PIDs.",
       "use_cases": ["Manage multiple parallel background processes", "Identify and kill specific background jobs", "Audit what's running in your shell session"],
       "hints": ["sleep 30 & sleep 60 & starts two jobs", "kill %1 kills job number 1", "Run: sleep 30 & sleep 60 & jobs && kill %1 2>/dev/null; true"],
-      "validation": { "type": "output_match", "command": "sleep 30 & sleep 60 & jobs && kill %1 2>/dev/null; kill %2 2>/dev/null; echo done", "pattern": "\\[2\\]" }
+      "validation": { "type": "output_match", "pattern": "\\[2\\].*sleep" }
     }
   ]
 }

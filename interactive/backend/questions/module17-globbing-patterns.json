@@ -9,7 +9,7 @@
       "description": "Globs expand to matching filenames before the command runs. * matches any sequence of characters (not /). ? matches exactly one character. [abc] matches one of a, b, or c. Unlike regex, globs are anchored to the full filename.",
       "use_cases": ["List all log files for rotation", "Process all scripts in a directory", "Find all config files of a specific type"],
       "hints": ["Use ls with a glob pattern", "*.sh matches anything ending in .sh", "Run: ls /home/student/scripts/*.sh"],
-      "validation": { "type": "output_contains", "command": "ls /home/student/scripts/*.sh", "substring": ".sh" }
+      "validation": { "type": "output_contains", "substring": "/home/student/scripts/backup.sh" }
     },
     {
       "id": "m17-q02",
@@ -36,7 +36,7 @@
       "description": "[a-z] in a glob matches exactly one character in the range. [!abc] or [^abc] negates — matches any character NOT in the set. Character classes in globs are similar to regex but simpler and less powerful.",
       "use_cases": ["Filter files by first character", "Match specific naming conventions", "Exclude files starting with numbers or underscores"],
       "hints": ["[a-z]* matches anything starting with a lowercase letter", "Combine with ls", "Run: ls /home/student/scripts/[a-z]*"],
-      "validation": { "type": "output_contains", "command": "ls /home/student/scripts/[a-z]*", "substring": "backup.sh" }
+      "validation": { "type": "output_contains", "substring": "/home/student/scripts/backup.sh" }
     },
     {
       "id": "m17-q05",

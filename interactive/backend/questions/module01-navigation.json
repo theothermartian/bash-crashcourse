@@ -18,7 +18,7 @@
       "description": "ls -la shows all files (including dotfiles starting with .) with permissions, ownership, size, and modification date. The -l flag gives long format, -a shows hidden files.",
       "use_cases": ["Audit file permissions", "Find hidden config files (.bashrc, .ssh/)", "Verify a script was created with correct permissions"],
       "hints": ["ls has flags to show hidden files and long format", "Hidden files start with a dot — you need the -a flag", "Run: ls -la"],
-      "validation": { "type": "output_match", "command": "ls -la ~", "pattern": "total" }
+      "validation": { "type": "output_contains", "substring": " .." }
     },
     {
       "id": "m01-q03",
@@ -27,7 +27,7 @@
       "description": "find searches directory trees. The -name flag accepts glob patterns. Always quote the pattern to prevent shell expansion before find sees it.",
       "use_cases": ["Locate scripts scattered across a directory tree", "Find log files by pattern", "Audit all config files of a specific type"],
       "hints": ["The command is 'find', takes a starting path and a -name filter", "Quote the pattern: -name '*.sh'", "Run: find /home/student -name '*.sh'"],
-      "validation": { "type": "output_contains", "command": "find /home/student -name '*.sh'", "substring": ".sh" }
+      "validation": { "type": "output_contains", "substring": "/home/student/scripts/backup.sh" }
     },
     {
       "id": "m01-q04",

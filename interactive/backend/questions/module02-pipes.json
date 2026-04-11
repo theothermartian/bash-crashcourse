@@ -27,7 +27,7 @@
       "description": "sort | uniq -c | sort -rn is the frequency idiom. First sort groups identical lines together, uniq -c counts consecutive duplicates, then sort -rn ranks by count descending. You'll use this daily.",
       "use_cases": ["Find most common error types", "Rank most active users in access logs", "Count API endpoint usage frequency"],
       "hints": ["Extract the level field first with grep -oE '(INFO|WARN|ERROR)'", "Then pipe into: sort | uniq -c | sort -rn", "Run: grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn"],
-      "validation": { "type": "output_contains", "command": "grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn", "substring": "INFO" }
+      "validation": { "type": "output_match", "pattern": "^\\s*[0-9]+\\s+INFO", "flags": "m" }
     },
     {
       "id": "m02-q04",

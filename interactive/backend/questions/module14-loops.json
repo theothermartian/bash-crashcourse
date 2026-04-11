@@ -45,7 +45,7 @@
       "description": "until condition; do ... done is the opposite of while — it loops UNTIL the condition becomes true (while it's false). Useful when the natural phrasing is 'keep going until X happens' rather than 'keep going while X holds'.",
       "use_cases": ["Wait until a service port is open", "Retry until a command succeeds", "Poll until a file appears"],
       "hints": ["until [[ condition ]]; do ... done", "Increment a counter and check when it hits 3", "Run: N=0; until (( N >= 3 )); do echo $N; (( N++ )); done"],
-      "validation": { "type": "output_contains", "command": "N=0; until (( N >= 3 )); do echo $N; (( N++ )); done", "substring": "2" }
+      "validation": { "type": "output_contains", "substring": "1\n2" }
     }
   ]
 }
