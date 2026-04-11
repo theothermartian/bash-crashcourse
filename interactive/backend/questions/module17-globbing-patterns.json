@@ -1,0 +1,51 @@
+{
+  "slug": "module17-globbing-patterns",
+  "name": "Globbing & Patterns",
+  "questions": [
+    {
+      "id": "m17-q01",
+      "scenario": "You need to list all Markdown files in /home/student without using find.",
+      "question": "Use a glob to list all .json files in /home/student recursively — or all files matching *.sh in /home/student/scripts.",
+      "description": "Globs expand to matching filenames before the command runs. * matches any sequence of characters (not /). ? matches exactly one character. [abc] matches one of a, b, or c. Unlike regex, globs are anchored to the full filename.",
+      "use_cases": ["List all log files for rotation", "Process all scripts in a directory", "Find all config files of a specific type"],
+      "hints": ["Use ls with a glob pattern", "*.sh matches anything ending in .sh", "Run: ls /home/student/scripts/*.sh"],
+      "validation": { "type": "output_contains", "command": "ls /home/student/scripts/*.sh", "substring": ".sh" }
+    },
+    {
+      "id": "m17-q02",
+      "scenario": "You need to create three related directories at once without repeating the base path.",
+      "question": "Use brace expansion to create /tmp/lab-{alpha,beta,gamma} in one command.",
+      "description": "Brace expansion {a,b,c} generates multiple strings before any other expansion. {alpha,beta,gamma} with a prefix/suffix creates all combinations. Not a glob — works even for non-existent paths. Order is preserved.",
+      "use_cases": ["Create multiple related directories at once", "Generate numbered backup names", "Quickly make several test files"],
+      "hints": ["mkdir with brace expansion creates all at once", "Syntax: prefix{a,b,c}suffix", "Run: mkdir -p /tmp/lab-{alpha,beta,gamma}"],
+      "validation": { "type": "file_exists", "path": "/tmp/lab-beta" }
+    },
+    {
+      "id": "m17-q03",
+      "scenario": "A script needs to process files numbered 01 through 05 in order.",
+      "question": "Use brace expansion to print the sequence file_01 through file_05.",
+      "description": "{start..end} generates a sequence. {1..5} gives 1 2 3 4 5. {01..05} gives zero-padded 01 02 03 04 05. {a..z} gives the alphabet. Add a step: {0..10..2} gives 0 2 4 6 8 10.",
+      "use_cases": ["Generate numbered filenames", "Create sequences for loop initialization", "Print alphabetic sequences"],
+      "hints": ["{01..05} gives zero-padded numbers", "Combine with a prefix string", "Run: echo file_{01..05}"],
+      "validation": { "type": "output_match", "command": "echo file_{01..05}", "pattern": "file_01 file_02 file_03 file_04 file_05" }
+    },
+    {
+      "id": "m17-q04",
+      "scenario": "You want to match only files that start with a lowercase letter in /home/student/scripts.",
+      "question": "Use a character class glob to list files starting with any letter a-z in /home/student/scripts.",
+      "description": "[a-z] in a glob matches exactly one character in the range. [!abc] or [^abc] negates — matches any character NOT in the set. Character classes in globs are similar to regex but simpler and less powerful.",
+      "use_cases": ["Filter files by first character", "Match specific naming conventions", "Exclude files starting with numbers or underscores"],
+      "hints": ["[a-z]* matches anything starting with a lowercase letter", "Combine with ls", "Run: ls /home/student/scripts/[a-z]*"],
+      "validation": { "type": "output_contains", "command": "ls /home/student/scripts/[a-z]*", "substring": "backup.sh" }
+    },
+    {
+      "id": "m17-q05",
+      "scenario": "You need to quickly create a backup of a file by appending .bak, using brace expansion.",
+      "question": "Use brace expansion to copy /home/student/logs/app.log to app.log.bak in one cp command.",
+      "description": "cp file{,.bak} expands to cp file file.bak — the empty string before the comma means 'no suffix'. This is a very common brace expansion trick for backups. Much faster than typing the full path twice.",
+      "use_cases": ["Quick file backups before editing", "Create original/modified pairs", "Rename with a suffix without retyping the full path"],
+      "hints": ["cp path{,.bak} expands to: cp path path.bak", "The comma with nothing before it means empty string", "Run: cp /home/student/logs/app.log{,.bak}"],
+      "validation": { "type": "file_exists", "path": "/home/student/logs/app.log.bak" }
+    }
+  ]
+}

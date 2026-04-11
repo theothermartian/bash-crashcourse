@@ -1,0 +1,42 @@
+{
+  "slug": "module05-process-substitution",
+  "name": "Process Substitution",
+  "questions": [
+    {
+      "id": "m05-q01",
+      "scenario": "Two operators ran 'ls /home/student/logs' and 'ls /home/student/data' on different machines. You need to compare the outputs without creating temp files.",
+      "question": "Use process substitution to diff the output of 'ls /home/student/logs' against 'ls /home/student/data'.",
+      "description": "Process substitution <(cmd) runs a command and presents its output as a virtual file. diff needs two filenames — process substitution lets you pass command output directly, no temp files needed.",
+      "use_cases": ["Compare outputs of two commands without temp files", "Diff two remote file listings over SSH", "Compare sorted vs unsorted versions of the same data"],
+      "hints": ["diff takes two filenames; use <(cmd) as each one", "Syntax: diff <(cmd1) <(cmd2)", "Run: diff <(ls /home/student/logs) <(ls /home/student/data)"],
+      "validation": { "type": "exit_code", "command": "diff <(ls /home/student/logs) <(ls /home/student/data); true", "expected": 0 }
+    },
+    {
+      "id": "m05-q02",
+      "scenario": "You want to sort the lines of /home/student/data/users.csv and diff it against the original to see which lines are out of order.",
+      "question": "Diff the original /home/student/data/users.csv against a sorted version of itself using process substitution.",
+      "description": "<(cmd) treats command output as a file descriptor. You can use the same source file inside a <() and do real-time transformation. This avoids any temp files or intermediate writes.",
+      "use_cases": ["Verify a file is already sorted", "Compare raw vs processed versions of data", "Find lines that change under transformation"],
+      "hints": ["diff takes two arguments — use <() for the sorted version", "sort reads the file, <() wraps it", "Run: diff /home/student/data/users.csv <(sort /home/student/data/users.csv)"],
+      "validation": { "type": "exit_code", "command": "diff /home/student/data/users.csv <(sort /home/student/data/users.csv); true", "expected": 0 }
+    },
+    {
+      "id": "m05-q03",
+      "scenario": "You need to count how many lines are in the output of 'ls /home/student' without storing it anywhere.",
+      "question": "Use process substitution to count the lines output by 'ls /home/student' using wc.",
+      "description": "wc expects a filename or stdin. <(cmd) gives wc a virtual filename backed by the command's output. Alternative to ls /home/student | wc -l, but useful when you need to pass the output to a command that only accepts filenames.",
+      "use_cases": ["Count lines in a command's output when piping isn't possible", "Pass command output to tools that only accept file arguments", "Measure output size without temp files"],
+      "hints": ["wc -l can take a filename or stdin", "Wrap the command in <()", "Run: wc -l <(ls /home/student)"],
+      "validation": { "type": "output_match", "command": "wc -l <(ls /home/student)", "pattern": "[0-9]+" }
+    },
+    {
+      "id": "m05-q04",
+      "scenario": "You want to log the output of a long-running command to a file via process substitution while still reading it in the pipeline.",
+      "question": "Use >(tee /tmp/ps-log.txt) to log 'echo reactor status ok' output while also passing it through cat.",
+      "description": ">(cmd) is output process substitution — it creates a virtual file you can write to, and writes are piped into cmd. Used to fan out writes: send to multiple destinations simultaneously.",
+      "use_cases": ["Log pipeline data to a file while continuing the pipeline", "Send output to multiple sinks simultaneously", "Transparently insert logging into an existing pipeline"],
+      "hints": ["Syntax: cmd | tee >(other-cmd) or cmd > >(other-cmd)", "The > before ( makes it an output substitution", "Run: echo 'reactor status ok' > >(tee /tmp/ps-log.txt)"],
+      "validation": { "type": "file_contains", "path": "/tmp/ps-log.txt", "pattern": "reactor status ok" }
+    }
+  ]
+}

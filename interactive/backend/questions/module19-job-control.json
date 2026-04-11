@@ -1,0 +1,51 @@
+{
+  "slug": "module19-job-control",
+  "name": "Job Control",
+  "questions": [
+    {
+      "id": "m19-q01",
+      "scenario": "A long-running backup needs to run in the background so you can continue working.",
+      "question": "Run 'sleep 5' in the background using & and confirm it started by listing jobs.",
+      "description": "Appending & to a command runs it as a background job. The shell prints [job_number] PID and returns the prompt immediately. The job's stdout still goes to the terminal unless redirected. $! holds the PID of the last background job.",
+      "use_cases": ["Run long backups without blocking the terminal", "Start multiple parallel processes", "Fire-and-forget monitoring tasks"],
+      "hints": ["Append & to send to background", "Then run jobs to see it", "Run: sleep 5 & jobs"],
+      "validation": { "type": "output_match", "command": "sleep 10 & jobs", "pattern": "\\[1\\]" }
+    },
+    {
+      "id": "m19-q02",
+      "scenario": "You started a job in the background and now need to wait for it to finish before continuing.",
+      "question": "Start 'sleep 1' in the background, capture its PID, then wait for it to finish.",
+      "description": "wait [PID] blocks until the specified background process finishes and returns its exit code. wait without arguments waits for ALL background jobs. Essential for parallel scripts where you need to collect results after all workers finish.",
+      "use_cases": ["Parallel backup jobs — wait for all to complete", "Start N workers and wait for all", "Collect exit codes from parallel processes"],
+      "hints": ["$! holds the PID of the last background job", "wait $! waits for it", "Run: sleep 1 & BGPID=$! && wait $BGPID && echo 'done'"],
+      "validation": { "type": "output_match", "command": "sleep 1 & BGPID=$! && wait $BGPID && echo 'done'", "pattern": "^done$" }
+    },
+    {
+      "id": "m19-q03",
+      "scenario": "You need a process to survive after you log out from SSH. Normal background jobs die with the session.",
+      "question": "Run 'sleep 60' with nohup in the background, redirecting output to /tmp/nohup-test.log.",
+      "description": "nohup prevents the process from receiving SIGHUP when the terminal closes. Without nohup, background jobs die when you log out. Always redirect output explicitly — nohup writes to nohup.out by default.",
+      "use_cases": ["Long-running scripts that must survive SSH disconnection", "Scheduled jobs started manually", "Background services without systemd"],
+      "hints": ["nohup cmd &", "Redirect stdout/stderr explicitly", "Run: nohup sleep 60 > /tmp/nohup-test.log 2>&1 &"],
+      "validation": { "type": "file_exists", "path": "/tmp/nohup-test.log" }
+    },
+    {
+      "id": "m19-q04",
+      "scenario": "You accidentally forgot to background a process and Ctrl+Z it. Now bring it back to the foreground.",
+      "question": "Start 'sleep 30', suspend it with Ctrl+Z conceptually — then use 'bg' and 'fg' commands: run 'sleep 30 &' then bring it foreground with fg.",
+      "description": "Ctrl+Z sends SIGTSTP — suspending the process. bg %N resumes job N in the background. fg %N brings it to the foreground. jobs lists all jobs with their numbers. This workflow is essential for terminal multitasking.",
+      "use_cases": ["Rescue a foreground process you forgot to background", "Switch between multiple shell tasks", "Manage interactive processes in a single terminal"],
+      "hints": ["Start sleep in background first with &", "fg brings the most recent job to foreground", "Run: sleep 30 & fg %1; kill %1 2>/dev/null; true"],
+      "validation": { "type": "exit_code", "command": "sleep 30 & sleep 0.1 && kill %1 2>/dev/null; true", "expected": 0 }
+    },
+    {
+      "id": "m19-q05",
+      "scenario": "You started multiple background jobs. You need to see all of them and kill one specifically.",
+      "question": "Start two background jobs (sleep 30 and sleep 60), list them with 'jobs', then kill job 1.",
+      "description": "jobs lists active background jobs with their number [N], status, and command. kill %N kills job N by job number (not PID). %% refers to the most recently started job. jobs -l includes PIDs.",
+      "use_cases": ["Manage multiple parallel background processes", "Identify and kill specific background jobs", "Audit what's running in your shell session"],
+      "hints": ["sleep 30 & sleep 60 & starts two jobs", "kill %1 kills job number 1", "Run: sleep 30 & sleep 60 & jobs && kill %1 2>/dev/null; true"],
+      "validation": { "type": "output_match", "command": "sleep 30 & sleep 60 & jobs && kill %1 2>/dev/null; kill %2 2>/dev/null; echo done", "pattern": "\\[2\\]" }
+    }
+  ]
+}

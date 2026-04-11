@@ -1,0 +1,51 @@
+{
+  "slug": "module01-navigation",
+  "name": "Navigation & Files",
+  "questions": [
+    {
+      "id": "m01-q01",
+      "scenario": "You just SSH'd into Reactor Block A's primary server. First thing: figure out where you are in the filesystem.",
+      "question": "Print your current working directory.",
+      "description": "pwd (print working directory) tells you exactly where you are in the filesystem. Always run it first when you SSH into an unfamiliar machine.",
+      "use_cases": ["Orient yourself after SSH login", "Verify your script is running from the right directory", "Debug path-related errors"],
+      "hints": ["It's a 3-letter command", "Think: 'print working directory'", "Run: pwd"],
+      "validation": { "type": "output_match", "command": "pwd", "pattern": "^/" }
+    },
+    {
+      "id": "m01-q02",
+      "scenario": "You need to see all files in your home directory, including hidden ones, with their permissions and ownership.",
+      "question": "List all files (including hidden) in the current directory with long format.",
+      "description": "ls -la shows all files (including dotfiles starting with .) with permissions, ownership, size, and modification date. The -l flag gives long format, -a shows hidden files.",
+      "use_cases": ["Audit file permissions", "Find hidden config files (.bashrc, .ssh/)", "Verify a script was created with correct permissions"],
+      "hints": ["ls has flags to show hidden files and long format", "Hidden files start with a dot — you need the -a flag", "Run: ls -la"],
+      "validation": { "type": "output_match", "command": "ls -la ~", "pattern": "total" }
+    },
+    {
+      "id": "m01-q03",
+      "scenario": "A backup script created files somewhere under /home/student. You need to find all shell scripts (.sh files) recursively.",
+      "question": "Find all files ending in .sh under /home/student.",
+      "description": "find searches directory trees. The -name flag accepts glob patterns. Always quote the pattern to prevent shell expansion before find sees it.",
+      "use_cases": ["Locate scripts scattered across a directory tree", "Find log files by pattern", "Audit all config files of a specific type"],
+      "hints": ["The command is 'find', takes a starting path and a -name filter", "Quote the pattern: -name '*.sh'", "Run: find /home/student -name '*.sh'"],
+      "validation": { "type": "output_contains", "command": "find /home/student -name '*.sh'", "substring": ".sh" }
+    },
+    {
+      "id": "m01-q04",
+      "scenario": "You need to create a nested directory structure /tmp/reactor/logs/archive in one command.",
+      "question": "Create the directory /tmp/reactor/logs/archive including all parent directories.",
+      "description": "mkdir -p creates a directory and all missing parent directories in one shot. Without -p, mkdir fails if the parent doesn't exist.",
+      "use_cases": ["Set up log directory structure in scripts", "Create nested backup paths", "Initialize application directory trees"],
+      "hints": ["mkdir has a flag to create parent directories automatically", "The -p flag means 'parents'", "Run: mkdir -p /tmp/reactor/logs/archive"],
+      "validation": { "type": "file_exists", "path": "/tmp/reactor/logs/archive" }
+    },
+    {
+      "id": "m01-q05",
+      "scenario": "You have a variable TARGET_DIR that could be empty. Before running rm -rf on it, you must guard against the empty case.",
+      "question": "Write a guard that exits with an error if TARGET_DIR is empty, then remove it. Set TARGET_DIR=/tmp/reactor first.",
+      "description": "The pattern [[ -n \"$var\" ]] || { echo error; exit 1; } is the standard guard before destructive operations. An empty variable in rm -rf $var/* deletes everything in the current directory.",
+      "use_cases": ["Guard before any rm -rf in scripts", "Validate required variables before use", "Prevent catastrophic mistakes from unset variables"],
+      "hints": ["First set the variable: TARGET_DIR=/tmp/reactor", "Check it's non-empty with [[ -n \"$TARGET_DIR\" ]]", "Run: TARGET_DIR=/tmp/reactor && [[ -n \"$TARGET_DIR\" ]] || { echo 'ERROR: empty'; exit 1; } && rm -rf \"$TARGET_DIR\""],
+      "validation": { "type": "exit_code", "command": "test ! -d /tmp/reactor", "expected": 0 }
+    }
+  ]
+}

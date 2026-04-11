@@ -1,0 +1,51 @@
+{
+  "slug": "module11-arithmetic",
+  "name": "Arithmetic",
+  "questions": [
+    {
+      "id": "m11-q01",
+      "scenario": "A monitoring script needs to add two values: 128 (MB used) and 256 (MB reserved).",
+      "question": "Print the result of 128 + 256 using bash arithmetic expansion.",
+      "description": "$(( )) is bash's arithmetic expansion. It evaluates integer expressions. Variables inside don't need $ prefix (though it works). Division is integer-only — use bc for floats.",
+      "use_cases": ["Calculate thresholds in monitoring scripts", "Compute offsets and sizes", "Simple integer math without external commands"],
+      "hints": ["The syntax is $(( expression ))", "No $ needed before variable names inside", "Run: echo $(( 128 + 256 ))"],
+      "validation": { "type": "output_match", "command": "echo $(( 128 + 256 ))", "pattern": "^384$" }
+    },
+    {
+      "id": "m11-q02",
+      "scenario": "A loop counter needs to be incremented. Use the C-style increment syntax.",
+      "question": "Set COUNT=5, increment it using (( COUNT++ )), then print it.",
+      "description": "(( )) (without $) evaluates arithmetic but discards the result — used for side effects like increment/decrement. (( COUNT++ )) is equivalent to COUNT=$((COUNT+1)). Note: (( 0 )) returns exit code 1, useful in while loops.",
+      "use_cases": ["Loop counters", "Retry attempt tracking", "Simple in-place increment without substitution"],
+      "hints": ["Set COUNT=5 first", "Then (( COUNT++ )) increments it", "Run: COUNT=5 && (( COUNT++ )) && echo $COUNT"],
+      "validation": { "type": "output_match", "command": "COUNT=5 && (( COUNT++ )) && echo $COUNT", "pattern": "^6$" }
+    },
+    {
+      "id": "m11-q03",
+      "scenario": "You need to check if 17 is divisible by 3 using the modulo operator.",
+      "question": "Print the remainder of 17 divided by 3 using arithmetic expansion.",
+      "description": "% is the modulo operator inside $(( )). Returns the remainder. Use it to check divisibility (result == 0), create rotating indices, or implement simple rate limiting in scripts.",
+      "use_cases": ["Check if a number is even/odd", "Run an action every N iterations in a loop", "Validate that file sizes are aligned to block boundaries"],
+      "hints": ["Modulo is % inside $(( ))", "17 % 3 should give 2", "Run: echo $(( 17 % 3 ))"],
+      "validation": { "type": "output_match", "command": "echo $(( 17 % 3 ))", "pattern": "^2$" }
+    },
+    {
+      "id": "m11-q04",
+      "scenario": "A script checks if disk usage (85%) exceeds a threshold (80%). Use arithmetic comparison.",
+      "question": "Use (( )) to check if 85 is greater than 80 and print 'ALERT' if true.",
+      "description": "Inside (( )) and [[ ]] you can use -gt, -lt, -ge, -le, -eq, -ne for numeric comparisons. (( 85 > 80 )) returns exit code 0 (true) when the expression is non-zero. Combine with if or &&.",
+      "use_cases": ["Alert when disk usage exceeds threshold", "Validate that backup file size is above minimum", "Rate-limit retries in scripts"],
+      "hints": ["(( 85 > 80 )) && echo 'ALERT'", "The (( )) returns 0 when expression is true", "Run: (( 85 > 80 )) && echo 'ALERT'"],
+      "validation": { "type": "output_match", "command": "(( 85 > 80 )) && echo 'ALERT'", "pattern": "^ALERT$" }
+    },
+    {
+      "id": "m11-q05",
+      "scenario": "You need to calculate 10 divided by 3 with decimal precision — bash integer math won't do it.",
+      "question": "Use bc to calculate 10 / 3 with 4 decimal places.",
+      "description": "bc is an arbitrary precision calculator. scale=4 sets decimal places. Feed expressions via here-string (<<<). Essential when bash's integer-only $(( )) is insufficient for monitoring thresholds or rate calculations.",
+      "use_cases": ["Calculate percentage disk usage with decimals", "Compute average response times", "Financial calculations in scripts"],
+      "hints": ["bc reads expressions from stdin", "Set scale=4 first for decimal output", "Run: echo 'scale=4; 10/3' | bc"],
+      "validation": { "type": "output_match", "command": "echo 'scale=4; 10/3' | bc", "pattern": "3\\.3333" }
+    }
+  ]
+}

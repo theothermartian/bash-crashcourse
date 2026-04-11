@@ -1,0 +1,51 @@
+{
+  "slug": "module14-loops",
+  "name": "Loops",
+  "questions": [
+    {
+      "id": "m14-q01",
+      "scenario": "You need to print a startup sequence for three reactor systems: alpha, beta, gamma.",
+      "question": "Use a for-in loop to print 'Starting: SYSTEM' for alpha, beta, and gamma.",
+      "description": "for item in list; do ... done iterates over space-separated words. The list can be literal words, a glob expansion, command substitution, or an array. Each item is assigned to the loop variable in turn.",
+      "use_cases": ["Process a fixed list of servers", "Iterate over file extensions", "Run a command for each item in a config list"],
+      "hints": ["for item in word1 word2 word3; do ... done", "Use echo inside with the loop variable", "Run: for sys in alpha beta gamma; do echo \"Starting: $sys\"; done"],
+      "validation": { "type": "output_contains", "command": "for sys in alpha beta gamma; do echo \"Starting: $sys\"; done", "substring": "Starting: beta" }
+    },
+    {
+      "id": "m14-q02",
+      "scenario": "A script needs to retry a command up to 5 times. Use a C-style loop with a counter.",
+      "question": "Use a C-style for loop to print 'Attempt N' for N from 1 to 5.",
+      "description": "for (( init; condition; step )) is the C-style for loop. Supports the full set of arithmetic operators. Useful when you need a numeric counter with specific start/end/step values.",
+      "use_cases": ["Retry loops with a max attempt count", "Generate numbered filenames", "Process array indices explicitly"],
+      "hints": ["Syntax: for (( i=1; i<=5; i++ )); do ... done", "Use $i inside the loop", "Run: for (( i=1; i<=5; i++ )); do echo \"Attempt $i\"; done"],
+      "validation": { "type": "output_contains", "command": "for (( i=1; i<=5; i++ )); do echo \"Attempt $i\"; done", "substring": "Attempt 5" }
+    },
+    {
+      "id": "m14-q03",
+      "scenario": "You have a file of server names, one per line. Process each one in a loop.",
+      "question": "Loop over /home/student/data/processes.txt line by line using while read and print each line.",
+      "description": "while IFS= read -r line; do ... done < file is the canonical way to read a file line by line. IFS= prevents trimming leading/trailing whitespace. -r prevents backslash interpretation. The < redirects the file into the while loop.",
+      "use_cases": ["Process log files line by line", "Apply a command to each line of output", "Read config files in scripts"],
+      "hints": ["while IFS= read -r line; do ... done < file", "The < feeds the file to the while loop", "Run: while IFS= read -r line; do echo \"$line\"; done < /home/student/data/processes.txt"],
+      "validation": { "type": "output_contains", "command": "while IFS= read -r line; do echo \"$line\"; done < /home/student/data/processes.txt", "substring": "nginx" }
+    },
+    {
+      "id": "m14-q04",
+      "scenario": "A loop searches for 'postgres' in a list and must stop as soon as it's found.",
+      "question": "Loop over the words 'nginx postgres backup' and break when you find 'postgres'.",
+      "description": "break exits the innermost loop immediately. continue skips the rest of the current iteration and jumps to the next. Both work in for, while, and until loops. break N exits N levels of nested loops.",
+      "use_cases": ["Stop searching as soon as a match is found", "Skip malformed entries in a loop", "Exit a retry loop on success"],
+      "hints": ["Use break inside the loop when the condition matches", "for item in ... with an if inside", "Run: for svc in nginx postgres backup; do [[ \"$svc\" == 'postgres' ]] && { echo \"Found: $svc\"; break; }; done"],
+      "validation": { "type": "output_match", "command": "for svc in nginx postgres backup; do [[ \"$svc\" == 'postgres' ]] && { echo \"Found: $svc\"; break; }; done", "pattern": "Found: postgres" }
+    },
+    {
+      "id": "m14-q05",
+      "scenario": "A script monitors a condition and should keep running until it's met (not while it's met).",
+      "question": "Use an until loop that increments a counter from 0 until it reaches 3, printing each value.",
+      "description": "until condition; do ... done is the opposite of while — it loops UNTIL the condition becomes true (while it's false). Useful when the natural phrasing is 'keep going until X happens' rather than 'keep going while X holds'.",
+      "use_cases": ["Wait until a service port is open", "Retry until a command succeeds", "Poll until a file appears"],
+      "hints": ["until [[ condition ]]; do ... done", "Increment a counter and check when it hits 3", "Run: N=0; until (( N >= 3 )); do echo $N; (( N++ )); done"],
+      "validation": { "type": "output_contains", "command": "N=0; until (( N >= 3 )); do echo $N; (( N++ )); done", "substring": "2" }
+    }
+  ]
+}

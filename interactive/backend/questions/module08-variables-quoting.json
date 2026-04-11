@@ -1,0 +1,51 @@
+{
+  "slug": "module08-variables-quoting",
+  "name": "Variables & Quoting",
+  "questions": [
+    {
+      "id": "m08-q01",
+      "scenario": "You need to store the facility name and print a greeting. Spaces in variable assignment are fatal.",
+      "question": "Assign 'Reactor Block A' to FACILITY and print: 'Welcome to Reactor Block A'.",
+      "description": "Variable assignment in bash has NO spaces around =. x = 1 is a syntax error (bash tries to run x as a command). x=1 works. Always quote values with spaces.",
+      "use_cases": ["Store configuration values", "Set display strings in scripts", "Hold dynamic values for reuse"],
+      "hints": ["No spaces around = in assignment", "Quote the value since it has spaces", "Run: FACILITY='Reactor Block A' && echo \"Welcome to $FACILITY\""],
+      "validation": { "type": "output_contains", "command": "FACILITY='Reactor Block A' && echo \"Welcome to $FACILITY\"", "substring": "Reactor Block A" }
+    },
+    {
+      "id": "m08-q02",
+      "scenario": "You need to understand the difference between double and single quotes. Double quotes expand variables; single quotes don't.",
+      "question": "Print the literal text '$USER' (not the expanded username) using single quotes.",
+      "description": "Single quotes preserve everything literally — no variable expansion, no command substitution, no escape sequences. Double quotes allow $var expansion and $(cmd) substitution. Use single quotes when you want raw text.",
+      "use_cases": ["Write configs containing literal dollar signs", "Print shell snippets without expansion", "Prevent accidental variable expansion in output"],
+      "hints": ["Single quotes prevent all expansion", "echo '$USER' prints literally $USER", "Run: echo '$USER'"],
+      "validation": { "type": "output_match", "command": "echo '$USER'", "pattern": "^\\$USER$" }
+    },
+    {
+      "id": "m08-q03",
+      "scenario": "A script has DIR='' (empty). Running rm -rf $DIR/* unquoted deletes the current directory. Prove it by showing what unquoted empty var expands to.",
+      "question": "Show that an unquoted empty variable disappears: set EMPTY='' and echo the result of echo \"arg1\" $EMPTY \"arg2\".",
+      "description": "Unquoted empty variables vanish entirely — bash removes them from the argument list. This is why rm -rf $dir/* with empty dir becomes rm -rf /* (delete everything). Always quote variables that could be empty.",
+      "use_cases": ["Understand the root cause of the rm -rf disaster pattern", "Debug scripts with unexpected argument counts", "Know why $# changes with unquoted empty vars"],
+      "hints": ["Set EMPTY='' then use it unquoted between two args", "The empty var should simply disappear from the output", "Run: EMPTY='' && echo \"arg1\" $EMPTY \"arg2\""],
+      "validation": { "type": "output_match", "command": "EMPTY='' && echo \"arg1\" $EMPTY \"arg2\"", "pattern": "^arg1 arg2$" }
+    },
+    {
+      "id": "m08-q04",
+      "scenario": "IFS (Internal Field Separator) controls how bash splits words. Show what happens when IFS is set to a comma.",
+      "question": "Set IFS=',' and use read to split 'alice,bob,charlie' into three variables A, B, C. Print all three.",
+      "description": "IFS determines what characters bash treats as word separators. Changing it is powerful but dangerous — always restore it or use a subshell. read uses IFS to split input into variables.",
+      "use_cases": ["Parse CSV data line by line", "Split delimited strings without awk", "Process colon-separated $PATH entries"],
+      "hints": ["Set IFS=',' then use read A B C <<< 'alice,bob,charlie'", "Print all three vars", "Run: IFS=',' read A B C <<< 'alice,bob,charlie' && echo \"$A $B $C\""],
+      "validation": { "type": "output_match", "command": "IFS=',' read A B C <<< 'alice,bob,charlie' && echo \"$A $B $C\"", "pattern": "alice bob charlie" }
+    },
+    {
+      "id": "m08-q05",
+      "scenario": "A filename contains spaces: 'reactor log.txt'. Show that unquoted variables break when filenames have spaces.",
+      "question": "Assign 'reactor log.txt' to FILE and show that echo $FILE produces two words but echo \"$FILE\" produces one.",
+      "description": "Quoting \"$var\" prevents word splitting and glob expansion. This is THE most important bash quoting rule. Any variable that could contain spaces, tabs, or glob characters must be double-quoted at the point of use.",
+      "use_cases": ["Handle filenames with spaces safely", "Prevent glob expansion of stored patterns", "Pass multi-word arguments correctly to commands"],
+      "hints": ["Set FILE='reactor log.txt', try both echo $FILE and echo \"$FILE\"", "Count words in the output", "Run: FILE='reactor log.txt' && echo $FILE && echo '---' && echo \"$FILE\""],
+      "validation": { "type": "output_contains", "command": "FILE='reactor log.txt' && echo \"$FILE\"", "substring": "reactor log.txt" }
+    }
+  ]
+}

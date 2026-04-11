@@ -1,0 +1,51 @@
+{
+  "slug": "module07-command-substitution",
+  "name": "Command Substitution",
+  "questions": [
+    {
+      "id": "m07-q01",
+      "scenario": "Your backup script needs a timestamp in the filename. Hard-coding dates is not an option.",
+      "question": "Store the current date (format: YYYY-MM-DD) in a variable called TODAY and print it.",
+      "description": "$(cmd) captures the stdout of a command and substitutes it inline. Trailing newlines are stripped automatically. This is the modern syntax — backticks `cmd` are legacy and should be avoided.",
+      "use_cases": ["Dynamic filenames with timestamps", "Capture hostname, user, or system info at runtime", "Store command output for later use in the script"],
+      "hints": ["Use $(date ...) to capture the date command output", "The format flag for date is +%Y-%m-%d", "Run: TODAY=$(date +%Y-%m-%d) && echo \"$TODAY\""],
+      "validation": { "type": "output_match", "command": "TODAY=$(date +%Y-%m-%d) && echo \"$TODAY\"", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+    },
+    {
+      "id": "m07-q02",
+      "scenario": "You need to count the number of lines in /home/student/logs/app.log and include the count in a message.",
+      "question": "Print the message 'Log has X lines' where X is the actual line count from wc -l.",
+      "description": "Command substitution works inline inside double-quoted strings. The result is word-split and glob-expanded unless quoted — always quote: \"$(cmd)\" to be safe.",
+      "use_cases": ["Include command output in log messages", "Build dynamic strings in scripts", "Report values without temporary variables"],
+      "hints": ["Use $(wc -l < file) inside the echo string", "Double-quote the whole echo argument", "Run: echo \"Log has $(wc -l < /home/student/logs/app.log) lines\""],
+      "validation": { "type": "output_match", "command": "echo \"Log has $(wc -l < /home/student/logs/app.log) lines\"", "pattern": "Log has [0-9]+ lines" }
+    },
+    {
+      "id": "m07-q03",
+      "scenario": "You need to build a filename using today's date AND the current user, nested into one string.",
+      "question": "Create a filename string in the format 'backup-USER-DATE.sql' using nested command substitutions.",
+      "description": "$() can be nested: $(outer $(inner)). The inner substitution runs first. Backticks cannot be nested cleanly — another reason to always use $(). Nested substitutions are common in dynamic filename generation.",
+      "use_cases": ["Generate unique filenames per user per date", "Build complex strings from multiple runtime values", "Create archive names that include environment information"],
+      "hints": ["Nest two $() calls inside a string", "$(whoami) gets the user, $(date +%Y%m%d) gets the date", "Run: echo \"backup-$(whoami)-$(date +%Y%m%d).sql\""],
+      "validation": { "type": "output_match", "command": "echo \"backup-$(whoami)-$(date +%Y%m%d).sql\"", "pattern": "backup-.+-.+\\.sql" }
+    },
+    {
+      "id": "m07-q04",
+      "scenario": "A script captures output of 'echo  hello   world  ' (extra spaces). Show that unquoted substitution splits it.",
+      "question": "Demonstrate word splitting: store 'echo  hello   world  ' in VAR unquoted and pass it to echo, vs quoted.",
+      "description": "Unquoted $var is word-split by bash on IFS (default: space/tab/newline) and glob-expanded. This destroys spacing and can trigger glob matches. Always quote: echo \"$VAR\" not echo $VAR.",
+      "use_cases": ["Understand why scripts break with filenames containing spaces", "Debug unexpected argument splitting", "Know when quoting is required vs optional"],
+      "hints": ["VAR=$(echo '  hello   world  '), then try echo $VAR vs echo \"$VAR\"", "The unquoted version collapses spaces", "Run: VAR=$(echo '  hello   world  '); echo $VAR; echo \"---\"; echo \"$VAR\""],
+      "validation": { "type": "output_contains", "command": "VAR=$(echo '  hello   world  '); echo $VAR; echo '---'; echo \"$VAR\"", "substring": "---" }
+    },
+    {
+      "id": "m07-q05",
+      "scenario": "You want the number of currently running processes. Use command substitution to get the count.",
+      "question": "Store the number of running processes (from ps aux | wc -l) in PROC_COUNT and print it.",
+      "description": "Command substitution is the primary way to capture numeric output for use in scripts. Combined with arithmetic expansion, this lets you compute and compare values at runtime.",
+      "use_cases": ["Alert if process count exceeds a threshold", "Track resource usage over time", "Validate expected process counts in health checks"],
+      "hints": ["PROC_COUNT=$(ps aux | wc -l) captures the count", "Print it with echo", "Run: PROC_COUNT=$(ps aux | wc -l) && echo \"Processes: $PROC_COUNT\""],
+      "validation": { "type": "output_match", "command": "PROC_COUNT=$(ps aux | wc -l) && echo \"Processes: $PROC_COUNT\"", "pattern": "Processes: [0-9]+" }
+    }
+  ]
+}

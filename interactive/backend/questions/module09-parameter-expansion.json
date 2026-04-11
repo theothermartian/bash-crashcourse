@@ -1,0 +1,60 @@
+{
+  "slug": "module09-parameter-expansion",
+  "name": "Parameter Expansion",
+  "questions": [
+    {
+      "id": "m09-q01",
+      "scenario": "A script uses a CONFIG_DIR variable that might not be set. Use a safe default if it's unset.",
+      "question": "Print ${CONFIG_DIR:-/etc/reactor} — use the default /etc/reactor if CONFIG_DIR is unset.",
+      "description": "${var:-default} returns the variable's value if set and non-empty, or the default otherwise. The variable is NOT assigned — it's just a safe read. Use ${var:=default} if you want assignment.",
+      "use_cases": ["Safe defaults for optional env vars", "Fallback paths in deploy scripts", "Default values for script arguments"],
+      "hints": ["Syntax: ${VARNAME:-default_value}", "CONFIG_DIR is not set, so the default fires", "Run: echo ${CONFIG_DIR:-/etc/reactor}"],
+      "validation": { "type": "output_match", "command": "echo ${CONFIG_DIR:-/etc/reactor}", "pattern": "/etc/reactor" }
+    },
+    {
+      "id": "m09-q02",
+      "scenario": "A required variable SITE_ID must be set before the script can continue. If it's not set, the script must abort with a message.",
+      "question": "Use ${SITE_ID:?} to print an error and exit if SITE_ID is not set.",
+      "description": "${var:?message} aborts the script with an error if var is unset or empty. This is the standard way to enforce required variables at the top of scripts — much better than checking manually.",
+      "use_cases": ["Enforce required environment variables", "Fail fast on missing config", "Validate input variables before destructive operations"],
+      "hints": ["Syntax: ${VARNAME:?'error message'}", "SITE_ID is not set so it will error", "Run: echo ${SITE_ID:?'SITE_ID is required'} and observe the error"],
+      "validation": { "type": "exit_code", "command": "bash -c 'echo ${SITE_ID:?required}' 2>/dev/null; echo $?", "expected": 0 }
+    },
+    {
+      "id": "m09-q03",
+      "scenario": "You need to know how many characters are in the HOSTNAME variable.",
+      "question": "Print the length of $HOSTNAME using parameter expansion.",
+      "description": "${#var} returns the number of characters in the variable's value. Works for strings and arrays (where it returns the number of elements). No external command needed.",
+      "use_cases": ["Validate that a variable isn't too long", "Pad or trim strings based on length", "Check that a required field isn't empty without using -z"],
+      "hints": ["Syntax: ${#VARNAME}", "This gives the string length", "Run: echo ${#HOSTNAME}"],
+      "validation": { "type": "output_match", "command": "echo ${#HOSTNAME}", "pattern": "^[0-9]+$" }
+    },
+    {
+      "id": "m09-q04",
+      "scenario": "A log file has the path /home/student/logs/app.log. You need just the filename without the directory.",
+      "question": "Use parameter expansion to strip the directory prefix from '/home/student/logs/app.log'.",
+      "description": "${var##prefix} removes the longest matching prefix pattern. ${var#prefix} removes the shortest. ## greedy, # non-greedy. Use */ to strip everything up to and including the last slash — equivalent to basename.",
+      "use_cases": ["Extract filename from a path without calling basename", "Strip protocol from a URL", "Remove a fixed prefix from variable values in a loop"],
+      "hints": ["${var##*/} removes everything up to the last /", "Set FILE=/home/student/logs/app.log first", "Run: FILE=/home/student/logs/app.log && echo ${FILE##*/}"],
+      "validation": { "type": "output_match", "command": "FILE=/home/student/logs/app.log && echo ${FILE##*/}", "pattern": "^app\\.log$" }
+    },
+    {
+      "id": "m09-q05",
+      "scenario": "A config value stored as 'status_offline' needs to be normalised to uppercase.",
+      "question": "Convert the variable STATUS='status_offline' to uppercase using parameter expansion.",
+      "description": "${var^^} converts to uppercase (bash 4+). ${var,,} converts to lowercase. ${var^} capitalises only the first character. No external commands (tr, awk) needed for simple case conversion.",
+      "use_cases": ["Normalise user input before comparison", "Generate SCREAMING_SNAKE_CASE env var names", "Ensure consistent casing in log messages"],
+      "hints": ["${VAR^^} converts to uppercase", "Set STATUS first, then expand", "Run: STATUS='status_offline' && echo ${STATUS^^}"],
+      "validation": { "type": "output_match", "command": "STATUS='status_offline' && echo ${STATUS^^}", "pattern": "^STATUS_OFFLINE$" }
+    },
+    {
+      "id": "m09-q06",
+      "scenario": "A message template contains the word 'ERROR' that needs to be replaced with 'ALERT' before logging.",
+      "question": "Replace all occurrences of 'ERROR' with 'ALERT' in MSG='ERROR: disk ERROR detected'.",
+      "description": "${var//pattern/replacement} replaces ALL occurrences of pattern. ${var/pattern/replacement} replaces only the first. No sed needed for simple string substitution within a variable.",
+      "use_cases": ["Sanitise variable values without external commands", "Normalise delimiters (replace : with ,)", "Strip unwanted substrings from variables"],
+      "hints": ["Syntax: ${var//old/new} replaces all", "Set MSG first, then expand", "Run: MSG='ERROR: disk ERROR detected' && echo ${MSG//ERROR/ALERT}"],
+      "validation": { "type": "output_match", "command": "MSG='ERROR: disk ERROR detected' && echo ${MSG//ERROR/ALERT}", "pattern": "ALERT: disk ALERT detected" }
+    }
+  ]
+}

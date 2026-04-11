@@ -1,0 +1,51 @@
+{
+  "slug": "module16-arrays",
+  "name": "Arrays",
+  "questions": [
+    {
+      "id": "m16-q01",
+      "scenario": "You need to store a list of reactor services in a variable without relying on string splitting.",
+      "question": "Create an indexed array SERVICES with values 'nginx', 'postgres', 'monitor' and print all elements.",
+      "description": "Arrays in bash: arr=(elem1 elem2 elem3). Access all elements with ${arr[@]}. Access one with ${arr[0]}. Arrays preserve multi-word elements correctly — unlike space-separated strings, they don't break on spaces.",
+      "use_cases": ["Store a list of servers without delimiter confusion", "Pass multiple values to a function cleanly", "Collect command outputs in a loop"],
+      "hints": ["Syntax: ARRNAME=(val1 val2 val3)", "${ARRNAME[@]} expands all elements", "Run: SERVICES=(nginx postgres monitor) && echo ${SERVICES[@]}"],
+      "validation": { "type": "output_contains", "command": "SERVICES=(nginx postgres monitor) && echo ${SERVICES[@]}", "substring": "postgres" }
+    },
+    {
+      "id": "m16-q02",
+      "scenario": "You need to access specific elements of an array by index.",
+      "question": "Create an array of three items and print the second element (index 1).",
+      "description": "Arrays are 0-indexed. ${arr[0]} is the first element, ${arr[1]} is second. ${arr[-1]} is the last. Bash arrays are sparse — you can have indices 0, 5, 100 with nothing in between.",
+      "use_cases": ["Access specific positional items in a list", "Process the first and last element differently", "Implement stack operations with ${arr[-1]}"],
+      "hints": ["Arrays are 0-indexed in bash", "${arr[1]} is the second element", "Run: A=(alpha beta gamma) && echo ${A[1]}"],
+      "validation": { "type": "output_match", "command": "A=(alpha beta gamma) && echo ${A[1]}", "pattern": "^beta$" }
+    },
+    {
+      "id": "m16-q03",
+      "scenario": "You need to iterate over all services in an array and print a status line for each.",
+      "question": "Loop over SERVICES=(nginx postgres monitor) and print 'Checking: SERVICE' for each.",
+      "description": "for item in \"${arr[@]}\"; do ... done iterates over array elements. The quotes around \"${arr[@]}\" are critical — without them, elements with spaces split into separate words.",
+      "use_cases": ["Apply an operation to each server in a list", "Health-check all services in a config array", "Validate each item in a list"],
+      "hints": ["Use for item in \"${ARRAY[@]}\" — note the quotes", "The quotes preserve multi-word elements", "Run: SERVICES=(nginx postgres monitor) && for s in \"${SERVICES[@]}\"; do echo \"Checking: $s\"; done"],
+      "validation": { "type": "output_contains", "command": "SERVICES=(nginx postgres monitor) && for s in \"${SERVICES[@]}\"; do echo \"Checking: $s\"; done", "substring": "Checking: monitor" }
+    },
+    {
+      "id": "m16-q04",
+      "scenario": "A script must know how many services are in the list before deciding whether to alert.",
+      "question": "Print the number of elements in SERVICES=(nginx postgres monitor backup).",
+      "description": "${#arr[@]} returns the number of elements in the array. ${#arr[0]} returns the length of the first element string. The @ and # combination is specific to array length.",
+      "use_cases": ["Alert if too many services are registered", "Validate array is non-empty before iterating", "Compute loop bounds from array size"],
+      "hints": ["${#ARRNAME[@]} gives the element count", "Prefix with # for length", "Run: SERVICES=(nginx postgres monitor backup) && echo ${#SERVICES[@]}"],
+      "validation": { "type": "output_match", "command": "SERVICES=(nginx postgres monitor backup) && echo ${#SERVICES[@]}", "pattern": "^4$" }
+    },
+    {
+      "id": "m16-q05",
+      "scenario": "You need to map service names to their ports for a config generator.",
+      "question": "Create an associative array mapping nginx→80 and postgres→5432. Print the postgres port.",
+      "description": "Associative arrays use string keys: declare -A arr; arr[key]=value. Access: ${arr[key]}. Keys can be any string. Must declare with -A before use — unlike indexed arrays. Bash 4+ only.",
+      "use_cases": ["Map service names to ports or IPs", "Store key-value config without external files", "Implement lookup tables in scripts"],
+      "hints": ["declare -A first, then assign with arr[key]=val", "Access: ${arr[key]}", "Run: declare -A PORTS && PORTS[nginx]=80 && PORTS[postgres]=5432 && echo ${PORTS[postgres]}"],
+      "validation": { "type": "output_match", "command": "declare -A PORTS && PORTS[nginx]=80 && PORTS[postgres]=5432 && echo ${PORTS[postgres]}", "pattern": "^5432$" }
+    }
+  ]
+}

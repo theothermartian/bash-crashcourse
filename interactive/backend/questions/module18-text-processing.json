@@ -1,0 +1,60 @@
+{
+  "slug": "module18-text-processing",
+  "name": "Text Processing",
+  "questions": [
+    {
+      "id": "m18-q01",
+      "scenario": "The on-call operator needs a count of ERROR lines in /home/student/logs/app.log.",
+      "question": "Count the number of lines containing 'ERROR' in /home/student/logs/app.log.",
+      "description": "grep -c counts matching lines (not occurrences — if a line has two ERRORs, it counts as 1). grep -v inverts the match. grep -i is case-insensitive. grep -E enables extended regex.",
+      "use_cases": ["Count error frequency in logs", "Alert if error count exceeds threshold", "Summarise log quality at a glance"],
+      "hints": ["grep -c counts matching lines", "Run: grep -c 'ERROR' /home/student/logs/app.log"],
+      "validation": { "type": "output_match", "command": "grep -c 'ERROR' /home/student/logs/app.log", "pattern": "^[0-9]+$" }
+    },
+    {
+      "id": "m18-q02",
+      "scenario": "You need to extract just the usernames from /home/student/data/users.csv (the first column).",
+      "question": "Use awk to print only the first column from /home/student/data/users.csv, skipping the header.",
+      "description": "awk '{print $1}' prints the first field. -F sets the delimiter. NR is the current line number. NR>1 skips the header. awk is a full programming language — the most powerful text column processor in the shell.",
+      "use_cases": ["Extract specific columns from CSV", "Compute column sums and averages", "Filter rows matching a condition"],
+      "hints": ["awk -F',' '{print $1}' splits on comma", "NR>1 skips the header row", "Run: awk -F',' 'NR>1 {print $1}' /home/student/data/users.csv"],
+      "validation": { "type": "output_contains", "command": "awk -F',' 'NR>1 {print $1}' /home/student/data/users.csv", "substring": "alice" }
+    },
+    {
+      "id": "m18-q03",
+      "scenario": "A log file has 'ERROR' entries but the new format requires 'CRITICAL'. Fix it with sed.",
+      "question": "Use sed to replace all occurrences of 'ERROR' with 'CRITICAL' in /home/student/logs/app.log and print the result.",
+      "description": "sed 's/old/new/g' substitutes all occurrences on each line (g = global). Without g, only the first match per line. sed -i edits in place. Always cp file.bak first before using -i in production.",
+      "use_cases": ["Fix typos or terminology changes in config files", "Normalise log formats for processing", "Remove or replace specific strings in files"],
+      "hints": ["sed 's/OLD/NEW/g' for global replacement", "Print to stdout (no -i)", "Run: sed 's/ERROR/CRITICAL/g' /home/student/logs/app.log | head -5"],
+      "validation": { "type": "output_contains", "command": "sed 's/ERROR/CRITICAL/g' /home/student/logs/app.log", "substring": "CRITICAL" }
+    },
+    {
+      "id": "m18-q04",
+      "scenario": "You need the role column (3rd field) from each row of /home/student/data/users.csv.",
+      "question": "Use cut to extract the third field from /home/student/data/users.csv using comma as delimiter.",
+      "description": "cut -d',' -f3 extracts field 3, delimited by comma. -f1,3 extracts fields 1 and 3. -f2- extracts from field 2 to end. cut is simpler than awk for single-field extraction from delimited files.",
+      "use_cases": ["Extract a specific column from CSV or TSV", "Get the username from /etc/passwd (-d: -f1)", "Trim field lists from structured output"],
+      "hints": ["-d sets delimiter, -f sets field number", "Fields are 1-indexed", "Run: cut -d',' -f3 /home/student/data/users.csv"],
+      "validation": { "type": "output_contains", "command": "cut -d',' -f3 /home/student/data/users.csv", "substring": "admin" }
+    },
+    {
+      "id": "m18-q05",
+      "scenario": "You need to convert all lowercase letters in a string to uppercase using tr.",
+      "question": "Use tr to convert 'reactor block alpha' to uppercase.",
+      "description": "tr translates characters. tr 'a-z' 'A-Z' maps each lowercase letter to its uppercase equivalent. tr -d deletes characters. tr -s squeezes repeated characters. Simpler than awk or sed for character-level transformations.",
+      "use_cases": ["Normalise input for comparison", "Convert file content to consistent case", "Remove specific characters (tr -d '\\r' to strip Windows line endings)"],
+      "hints": ["tr 'a-z' 'A-Z' converts lowercase to uppercase", "Feed the string via echo or here-string", "Run: echo 'reactor block alpha' | tr 'a-z' 'A-Z'"],
+      "validation": { "type": "output_match", "command": "echo 'reactor block alpha' | tr 'a-z' 'A-Z'", "pattern": "^REACTOR BLOCK ALPHA$" }
+    },
+    {
+      "id": "m18-q06",
+      "scenario": "You need a frequency breakdown of which log levels appear most in /home/student/logs/app.log.",
+      "question": "Use the frequency idiom (sort | uniq -c | sort -rn) to rank log levels by occurrence.",
+      "description": "The frequency idiom: grep to extract, sort to group, uniq -c to count consecutive duplicates, sort -rn to rank by count descending. You'll use this combination almost daily as a sysadmin.",
+      "use_cases": ["Find most common errors in a log", "Rank most active users in access logs", "Identify most frequent commands in history"],
+      "hints": ["grep -oE extracts only the matched text", "Pipe into sort | uniq -c | sort -rn", "Run: grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn"],
+      "validation": { "type": "output_contains", "command": "grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn", "substring": "INFO" }
+    }
+  ]
+}

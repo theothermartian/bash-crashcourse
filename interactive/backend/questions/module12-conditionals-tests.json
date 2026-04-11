@@ -1,0 +1,60 @@
+{
+  "slug": "module12-conditionals-tests",
+  "name": "Conditionals & Tests",
+  "questions": [
+    {
+      "id": "m12-q01",
+      "scenario": "Before reading a config file, your script must verify it actually exists.",
+      "question": "Use [[ -f ]] to check if /home/student/logs/app.log exists and print 'exists' or 'missing'.",
+      "description": "[[ -f path ]] tests for a regular file. -d for directory, -e for anything (file or dir), -s for non-empty file, -x for executable. [[ ]] is the modern bash test command — prefer it over [ ] or test.",
+      "use_cases": ["Verify config files before reading", "Check backup files exist before declaring success", "Guard script logic on file presence"],
+      "hints": ["[[ -f path ]] returns true if path is a regular file", "Use if/then/else or && / ||", "Run: [[ -f /home/student/logs/app.log ]] && echo 'exists' || echo 'missing'"],
+      "validation": { "type": "output_match", "command": "[[ -f /home/student/logs/app.log ]] && echo 'exists' || echo 'missing'", "pattern": "^exists$" }
+    },
+    {
+      "id": "m12-q02",
+      "scenario": "A script needs to create a directory only if it doesn't already exist.",
+      "question": "Use [[ -d ]] to check if /tmp/reactor exists and create it only if it doesn't.",
+      "description": "-d tests for a directory. The ! negates the test. [[ ! -d path ]] is true when the directory does NOT exist. This pattern is cleaner than mkdir -p for cases where you need to branch on existence.",
+      "use_cases": ["Idempotent directory creation in deploy scripts", "Guard setup steps that must only run once", "Detect missing required directories at startup"],
+      "hints": ["[[ ! -d path ]] is true if directory does NOT exist", "Combine with && mkdir", "Run: [[ ! -d /tmp/reactor ]] && mkdir /tmp/reactor && echo 'created' || echo 'already exists'"],
+      "validation": { "type": "file_exists", "path": "/tmp/reactor" }
+    },
+    {
+      "id": "m12-q03",
+      "scenario": "A script receives a SERVICE variable. Before using it, verify it's not empty.",
+      "question": "Set SERVICE='' and use [[ -z ]] to detect the empty string, printing a warning.",
+      "description": "-z tests for an empty (zero-length) string. -n tests for non-empty. These are the standard string emptiness checks. Always quote the variable: [[ -z \"$var\" ]] not [[ -z $var ]].",
+      "use_cases": ["Validate required script arguments", "Check that a variable was set before use", "Guard against empty database query results"],
+      "hints": ["-z means 'zero length' — true if empty", "Set SERVICE='' first", "Run: SERVICE='' && [[ -z \"$SERVICE\" ]] && echo 'WARNING: SERVICE is empty'"],
+      "validation": { "type": "output_match", "command": "SERVICE='' && [[ -z \"$SERVICE\" ]] && echo 'WARNING: SERVICE is empty'", "pattern": "WARNING" }
+    },
+    {
+      "id": "m12-q04",
+      "scenario": "A script compares two version strings and must branch based on equality.",
+      "question": "Set VERSION='2.1.0' and check if it equals '2.1.0' using [[ == ]], printing 'match' or 'no match'.",
+      "description": "[[ == ]] does string comparison. [[ != ]] for inequality. The right side can be a glob pattern (without quotes): [[ $var == *.log ]] matches files ending in .log. For regex use =~ instead.",
+      "use_cases": ["Check software version strings", "Validate environment name matches expected", "Compare config values"],
+      "hints": ["[[ \"$var\" == 'value' ]] for string equality", "Set VERSION first", "Run: VERSION='2.1.0' && [[ \"$VERSION\" == '2.1.0' ]] && echo 'match' || echo 'no match'"],
+      "validation": { "type": "output_match", "command": "VERSION='2.1.0' && [[ \"$VERSION\" == '2.1.0' ]] && echo 'match' || echo 'no match'", "pattern": "^match$" }
+    },
+    {
+      "id": "m12-q05",
+      "scenario": "A script validates that a service name contains only alphanumeric characters and hyphens — no special chars.",
+      "question": "Use [[ =~ ]] to test if 'nginx-proxy' matches the pattern ^[a-zA-Z0-9-]+$ and print the result.",
+      "description": "[[ string =~ regex ]] performs POSIX extended regex matching. Only available in [[ ]], NOT in [ ]. The match is unanchored by default — use ^ and $ to anchor. BASH_REMATCH holds capture groups.",
+      "use_cases": ["Validate service names, hostnames, usernames", "Extract data with regex capture groups", "Sanitise input before using it in commands"],
+      "hints": ["=~ is only valid inside [[ ]]", "Don't quote the regex pattern", "Run: [[ 'nginx-proxy' =~ ^[a-zA-Z0-9-]+$ ]] && echo 'valid' || echo 'invalid'"],
+      "validation": { "type": "output_match", "command": "[[ 'nginx-proxy' =~ ^[a-zA-Z0-9-]+$ ]] && echo 'valid' || echo 'invalid'", "pattern": "^valid$" }
+    },
+    {
+      "id": "m12-q06",
+      "scenario": "Show the key difference between [ ] and [[ ]]: regex matching only works in one.",
+      "question": "Show that [[ 'abc123' =~ ^[a-z]+[0-9]+$ ]] works but [ 'abc123' =~ ... ] would fail.",
+      "description": "[ ] is POSIX sh, doesn't support =~, <, >, or pattern matching. [[ ]] is bash-specific and supports =~, regex, globbing on the right side, and doesn't word-split or glob-expand variables. Always use [[ ]] in bash scripts.",
+      "use_cases": ["Write portable vs bash-optimised scripts", "Understand why scripts fail in sh vs bash", "Use [[ ]] consistently to avoid subtle bugs"],
+      "hints": ["[[ ]] supports =~ for regex", "[ ] does not support =~", "Run: [[ 'abc123' =~ ^[a-z]+[0-9]+$ ]] && echo 'matched in [[]]'"],
+      "validation": { "type": "output_match", "command": "[[ 'abc123' =~ ^[a-z]+[0-9]+$ ]] && echo 'matched'", "pattern": "^matched$" }
+    }
+  ]
+}

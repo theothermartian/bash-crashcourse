@@ -1,0 +1,42 @@
+{
+  "slug": "module04-heredocs",
+  "name": "Here-Docs & Here-Strings",
+  "questions": [
+    {
+      "id": "m04-q01",
+      "scenario": "You need to write a multi-line config file to /tmp/reactor.conf from a script without creating a separate template file.",
+      "question": "Write a here-doc that creates /tmp/reactor.conf with two lines: 'FACILITY=reactor-a' and 'STATUS=online'.",
+      "description": "A here-doc (<<EOF...EOF) lets you write multi-line text inline in a script. The content is fed to the command's stdin. Variable expansion happens by default — use <<'EOF' to suppress it.",
+      "use_cases": ["Generate config files in deploy scripts", "Write multi-line SQL queries inline", "Create template files without separate template files"],
+      "hints": ["Syntax: command <<EOF ... EOF on its own line", "cat with a here-doc writes the text", "Run: cat > /tmp/reactor.conf <<EOF\nFACILITY=reactor-a\nSTATUS=online\nEOF"],
+      "validation": { "type": "file_contains", "path": "/tmp/reactor.conf", "pattern": "FACILITY=reactor-a" }
+    },
+    {
+      "id": "m04-q02",
+      "scenario": "You need to write a here-doc that contains a literal $HOSTNAME without it being expanded to the actual hostname.",
+      "question": "Write a here-doc to /tmp/literal.txt containing the literal text '$HOSTNAME' (not the expanded value).",
+      "description": "Quoting the delimiter (<<'EOF') disables all variable expansion and command substitution inside the here-doc. The content is treated as a raw string. Essential when generating scripts or configs that contain shell variables.",
+      "use_cases": ["Generate shell scripts with variables meant for later execution", "Write configs containing $ characters without escaping", "Template files where variables should not be expanded at write time"],
+      "hints": ["Quote the opening delimiter with single quotes: <<'EOF'", "Everything inside becomes literal", "Run: cat > /tmp/literal.txt <<'EOF'\n$HOSTNAME\nEOF"],
+      "validation": { "type": "file_contains", "path": "/tmp/literal.txt", "pattern": "\\$HOSTNAME" }
+    },
+    {
+      "id": "m04-q03",
+      "scenario": "You need to count words in a known string inline — no files, no pipes.",
+      "question": "Use a here-string to pass 'five four three two one' to wc and count its words.",
+      "description": "The here-string (<<<) feeds a single string to a command's stdin. It's lighter than a here-doc and avoids echo | command, which spawns a subshell. Bash-specific, not POSIX sh.",
+      "use_cases": ["Quick inline data feeding", "Test commands with known input", "Avoid echo | command subshell overhead"],
+      "hints": ["The operator is <<< with the string after it", "wc -w counts words", "Run: wc -w <<< 'five four three two one'"],
+      "validation": { "type": "output_match", "command": "wc -w <<< 'five four three two one'", "pattern": "^\\s*5\\s*$" }
+    },
+    {
+      "id": "m04-q04",
+      "scenario": "A script writes a SQL query inline using a here-doc. The USER variable should expand inside it.",
+      "question": "Use a here-doc to print a two-line message where the first line says 'Operator: ' followed by your actual $USER value.",
+      "description": "By default (unquoted delimiter), variables inside a here-doc ARE expanded. This lets you generate dynamic content based on current environment variables — the most common here-doc use case.",
+      "use_cases": ["Generate dynamic config with environment values", "Create personalised reports in scripts", "Build SQL queries with runtime-determined parameters"],
+      "hints": ["Use <<EOF (no quotes) to allow variable expansion", "cat the here-doc to stdout", "Run: cat <<EOF\nOperator: $USER\nStatus: online\nEOF"],
+      "validation": { "type": "output_contains", "command": "cat <<EOF\nOperator: $USER\nStatus: online\nEOF", "substring": "Operator:" }
+    }
+  ]
+}

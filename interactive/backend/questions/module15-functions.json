@@ -1,0 +1,51 @@
+{
+  "slug": "module15-functions",
+  "name": "Functions",
+  "questions": [
+    {
+      "id": "m15-q01",
+      "scenario": "Your script has a repeated greeting block. Refactor it into a reusable function.",
+      "question": "Define a function called 'greet' that prints 'Hello, operator!' and call it.",
+      "description": "Functions in bash: function_name() { commands; }. No argument list in the definition — arguments are accessed via $1, $2, etc. Define before calling. Functions run in the current shell context (not a subshell).",
+      "use_cases": ["Avoid repeating the same commands multiple times", "Group related operations under a meaningful name", "Make scripts easier to read and maintain"],
+      "hints": ["Syntax: name() { ... }", "Call it by just writing the function name", "Run: greet() { echo 'Hello, operator!'; } && greet"],
+      "validation": { "type": "output_match", "command": "greet() { echo 'Hello, operator!'; } && greet", "pattern": "Hello, operator!" }
+    },
+    {
+      "id": "m15-q02",
+      "scenario": "A function uses a counter variable. Prove that without 'local', it leaks into the caller's scope.",
+      "question": "Define a function that sets a variable with 'local'. Show the variable is empty outside the function.",
+      "description": "'local var=value' limits a variable to the function's scope. Without local, all variables are global and persist after the function returns — a common source of bugs in larger scripts.",
+      "use_cases": ["Prevent function variables from polluting global scope", "Write reusable functions that don't cause side effects", "Safe counter and temp variables in recursive functions"],
+      "hints": ["local RESULT='hidden' inside the function", "Echo $RESULT outside — should be empty", "Run: f() { local RESULT='hidden'; echo \"inside: $RESULT\"; } && f && echo \"outside: $RESULT\""],
+      "validation": { "type": "output_match", "command": "f() { local RESULT='hidden'; echo \"inside: $RESULT\"; } && f && echo \"outside: '$RESULT'\"", "pattern": "outside: ''" }
+    },
+    {
+      "id": "m15-q03",
+      "scenario": "A function checks if a service name is valid. It should communicate pass/fail via exit code, not a global variable.",
+      "question": "Write a function 'is_valid' that returns 0 if the argument matches ^[a-z]+$ and 1 otherwise. Test with 'nginx'.",
+      "description": "Functions use 'return N' to return an exit code (0-255). This is NOT like a language return value — you can't return strings. To return strings, use echo inside the function and capture with $().",
+      "use_cases": ["Validation functions that integrate with && / || logic", "Predicate functions for if conditions", "Reusable guards across a script"],
+      "hints": ["return 0 for success, return 1 for failure", "Use [[ $1 =~ ^[a-z]+$ ]] for the check", "Run: is_valid() { [[ \"$1\" =~ ^[a-z]+$ ]] && return 0 || return 1; } && is_valid nginx && echo 'valid'"],
+      "validation": { "type": "output_match", "command": "is_valid() { [[ \"$1\" =~ ^[a-z]+$ ]] && return 0 || return 1; } && is_valid nginx && echo 'valid'", "pattern": "^valid$" }
+    },
+    {
+      "id": "m15-q04",
+      "scenario": "A logging function must prefix every message with a timestamp and level.",
+      "question": "Write a log_msg function that takes LEVEL and MSG as arguments and prints: '[LEVEL] MSG'.",
+      "description": "Function arguments are accessed via $1, $2, $@. Assign them to local named variables immediately for clarity: local level=$1. $# inside a function gives the argument count for that function call.",
+      "use_cases": ["Consistent log format across a script", "Reusable utilities with parameters", "Wrapping complex logic behind simple interfaces"],
+      "hints": ["Arguments are $1, $2 inside the function", "Assign to local vars for readability", "Run: log_msg() { local level=$1; local msg=$2; echo \"[$level] $msg\"; } && log_msg INFO 'System online'"],
+      "validation": { "type": "output_match", "command": "log_msg() { local level=$1; local msg=$2; echo \"[$level] $msg\"; } && log_msg INFO 'System online'", "pattern": "\\[INFO\\] System online" }
+    },
+    {
+      "id": "m15-q05",
+      "scenario": "A function needs to know its own name for a self-referential error message.",
+      "question": "Write a function that prints its own name using $FUNCNAME, then call it.",
+      "description": "$FUNCNAME is an array — $FUNCNAME[0] is the current function, $FUNCNAME[1] is the caller, and so on. Useful for error messages that report exactly which function failed, without hardcoding names.",
+      "use_cases": ["Self-documenting error messages", "Debug call stacks in complex scripts", "Avoid hardcoding function names in error strings"],
+      "hints": ["$FUNCNAME inside a function gives its name", "Just echo $FUNCNAME", "Run: whoami_fn() { echo \"I am: ${FUNCNAME[0]}\"; } && whoami_fn"],
+      "validation": { "type": "output_match", "command": "whoami_fn() { echo \"I am: ${FUNCNAME[0]}\"; } && whoami_fn", "pattern": "I am: whoami_fn" }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "slug": "module20-error-handling-debug",
+  "name": "Error Handling & Debugging",
+  "questions": [
+    {
+      "id": "m20-q01",
+      "scenario": "A script runs multiple commands. Without error handling, a failure in step 2 silently allows step 3 to run on bad data.",
+      "question": "Write a two-command sequence where set -e causes the script to stop at the first failure.",
+      "description": "set -e (errexit) exits the script immediately when any command returns non-zero. Without it, scripts blunder through failures silently. Part of the mandatory header: set -euo pipefail. The e and u and pipefail work together — each catches a different class of failure.",
+      "use_cases": ["Prevent cascading failures in deploy scripts", "Stop a backup script if pg_dump fails", "Ensure setup steps all succeed before continuing"],
+      "hints": ["set -e at the top, then run a failing command followed by echo", "The echo should NOT run", "Run: bash -c 'set -e; ls /nonexistent; echo this_should_not_print' 2>/dev/null; echo \"exit: $?\""],
+      "validation": { "type": "output_match", "command": "bash -c 'set -e; ls /nonexistent; echo THIS_SHOULD_NOT_PRINT' 2>/dev/null; echo \"stopped: $?\"", "pattern": "stopped:" }
+    },
+    {
+      "id": "m20-q02",
+      "scenario": "A script references $UNDEFINED_VAR by accident. Without set -u, this expands to empty string silently.",
+      "question": "Demonstrate set -u: show that referencing an unset variable causes an immediate error.",
+      "description": "set -u (nounset) treats references to unset variables as errors. Without it, $TYPO_VAR expands to empty string — the script continues with wrong data. With set -u, the script aborts at the point of the bad reference.",
+      "use_cases": ["Catch variable name typos early", "Prevent silent failures from undefined config vars", "Enforce that all required variables are set"],
+      "hints": ["set -u then reference an undefined variable", "The script should fail with an 'unbound variable' error", "Run: bash -c 'set -u; echo $UNDEFINED_VAR' 2>&1 | grep -o 'unbound\\|UNDEFINED'"],
+      "validation": { "type": "output_match", "command": "bash -c 'set -u; echo $UNDEFINED_VAR' 2>&1 | grep -oc 'unbound\\|UNDEFINED'", "pattern": "^[1-9]" }
+    },
+    {
+      "id": "m20-q03",
+      "scenario": "A script creates a temp file. It must be cleaned up whether the script succeeds or fails.",
+      "question": "Set up a trap that removes /tmp/lab-trap.txt on EXIT, create the file, then verify the trap runs.",
+      "description": "trap 'command' SIGNAL runs the command when the signal occurs. EXIT fires on any exit (normal or error). ERR fires on command failure. INT fires on Ctrl+C. Traps are the bash equivalent of try/finally.",
+      "use_cases": ["Clean up temp files on exit", "Release lockfiles even on failure", "Log when a script terminates unexpectedly"],
+      "hints": ["trap 'rm -f /tmp/lab-trap.txt' EXIT", "Create the file, then the trap cleans it on exit", "Run: bash -c 'trap \"rm -f /tmp/lab-trap.txt\" EXIT; touch /tmp/lab-trap.txt' && test ! -f /tmp/lab-trap.txt && echo 'cleaned up'"],
+      "validation": { "type": "output_match", "command": "bash -c 'trap \"rm -f /tmp/lab-trap.txt\" EXIT; touch /tmp/lab-trap.txt' && test ! -f /tmp/lab-trap.txt && echo 'cleaned up'", "pattern": "cleaned up" }
+    },
+    {
+      "id": "m20-q04",
+      "scenario": "A script is failing at an unknown line. You need to see every command as it executes.",
+      "question": "Use set -x to trace execution of a three-command script and observe the output.",
+      "description": "set -x prints each command to stderr before executing it, prefixed with +. This is the bash debugger — you see exactly what's running and what values variables have at execution time. Disable with set +x.",
+      "use_cases": ["Debug scripts that produce wrong output", "Trace variable values through a complex script", "Understand what a third-party script is doing"],
+      "hints": ["set -x turns on tracing", "Run a few commands and see the + prefixed lines", "Run: bash -c 'set -x; X=42; echo $X; Y=$((X*2)); echo $Y' 2>&1 | head -6"],
+      "validation": { "type": "output_contains", "command": "bash -c 'set -x; X=42; echo $X' 2>&1", "substring": "+ X=42" }
+    },
+    {
+      "id": "m20-q05",
+      "scenario": "A script fails at line N but you don't know which line that is. $LINENO tells you.",
+      "question": "Write a trap that prints the line number when an error occurs using $LINENO.",
+      "description": "$LINENO holds the current line number being executed. Combined with trap 'handler' ERR, you get the exact line of any failure. $BASH_SOURCE gives the filename. Together these form the minimal crash reporter for bash scripts.",
+      "use_cases": ["Identify exactly where a script fails in production", "Add line numbers to error log entries", "Debug scripts without adding echo statements everywhere"],
+      "hints": ["trap 'echo ERROR at line $LINENO' ERR", "Then run a failing command", "Run: bash -c 'trap '\"'\"'echo ERROR at line $LINENO'\"'\"' ERR; ls /nonexistent' 2>/dev/null"],
+      "validation": { "type": "output_contains", "command": "bash -c 'trap '\"'\"'echo ERROR at line $LINENO'\"'\"' ERR; ls /nonexistent' 2>/dev/null", "substring": "ERROR at line" }
+    },
+    {
+      "id": "m20-q06",
+      "scenario": "Before running a script, you must verify it passes static analysis. shellcheck catches bugs before they run.",
+      "question": "Run shellcheck on /home/student/scripts/broken.sh and observe what it reports.",
+      "description": "shellcheck performs static analysis on bash scripts. It catches unquoted variables, undefined variables, deprecated syntax, common mistakes, and style issues — before any code runs. Run it on every script before executing.",
+      "use_cases": ["Catch quoting bugs before they cause rm -rf disasters", "Find undefined variable references", "Enforce consistent safe coding style in a team"],
+      "hints": ["shellcheck takes a filename argument", "broken.sh has intentional bugs", "Run: shellcheck /home/student/scripts/broken.sh; true"],
+      "validation": { "type": "output_contains", "command": "shellcheck /home/student/scripts/broken.sh 2>&1; true", "substring": "SC" }
+    }
+  ]
+}

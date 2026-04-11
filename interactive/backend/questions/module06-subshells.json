@@ -1,0 +1,51 @@
+{
+  "slug": "module06-subshells",
+  "name": "Subshells",
+  "questions": [
+    {
+      "id": "m06-q01",
+      "scenario": "You need to run three commands grouped together as a unit, in a subshell, and capture the combined exit code.",
+      "question": "Run 'echo start && echo middle && echo end' in a subshell using parentheses.",
+      "description": "( ) runs commands in a subshell — a child process. Variables set inside don't affect the parent. Working directory changes don't persist. The subshell's exit code is the last command's exit code.",
+      "use_cases": ["Group commands for combined exit code checking", "Run commands in a different directory without affecting the parent", "Isolate environment changes"],
+      "hints": ["Wrap the commands in parentheses ()", "Put the commands inside with && between them", "Run: (echo start && echo middle && echo end)"],
+      "validation": { "type": "output_contains", "command": "(echo start && echo middle && echo end)", "substring": "middle" }
+    },
+    {
+      "id": "m06-q02",
+      "scenario": "You set a variable inside a subshell. Prove that it does NOT persist in the parent shell.",
+      "question": "Set X=changed inside a subshell, then echo $X outside it. Show X is still empty in the parent.",
+      "description": "Subshells inherit the parent's environment but cannot modify it. Any variable assignment inside ( ) is invisible to the parent. This is a critical distinction — use export or command substitution to pass values out.",
+      "use_cases": ["Safely test variable changes without affecting the running script", "Understand why loop variables sometimes 'disappear'", "Explain pipeline subshell scoping bugs"],
+      "hints": ["Set X=changed inside (), echo $X outside", "The outer $X should be empty", "Run: (X=changed); echo \"X is: $X\""],
+      "validation": { "type": "output_match", "command": "(X=changed); echo \"X is: $X\"", "pattern": "X is:\\s*$" }
+    },
+    {
+      "id": "m06-q03",
+      "scenario": "You need to cd into /tmp to run a command, but you must return to the original directory afterward — without using pushd/popd.",
+      "question": "Change into /tmp inside a subshell, print the working directory, and confirm the parent shell is still in /home/student.",
+      "description": "cd inside a subshell only changes the working directory for that child process. The parent shell is completely unaffected. This is the cleanest way to run commands in a different directory temporarily.",
+      "use_cases": ["Run a build command in a specific directory without affecting caller", "Execute scripts that expect a certain CWD", "Keep working directory clean in deploy scripts"],
+      "hints": ["Run cd /tmp inside ()", "pwd inside the subshell shows /tmp", "Run: (cd /tmp && pwd) && pwd"],
+      "validation": { "type": "output_contains", "command": "(cd /tmp && pwd) && pwd", "substring": "/tmp" }
+    },
+    {
+      "id": "m06-q04",
+      "scenario": "You need to capture the output of a group of commands into a variable.",
+      "question": "Capture the output of (echo 'reactor' && echo 'online') into a variable RESULT and print it.",
+      "description": "$( ) is command substitution — it runs a command (or subshell) and captures stdout as a string. The subshell inside $() follows the same isolation rules: variables set inside don't affect the parent.",
+      "use_cases": ["Capture multi-command output into a variable", "Build dynamic strings from command output", "Store timestamps, hostnames, or other runtime values"],
+      "hints": ["Wrap the subshell in $() to capture output", "Assign to RESULT=$(...)", "Run: RESULT=$(echo 'reactor' && echo 'online') && echo \"$RESULT\""],
+      "validation": { "type": "output_contains", "command": "RESULT=$(echo 'reactor' && echo 'online') && echo \"$RESULT\"", "substring": "reactor" }
+    },
+    {
+      "id": "m06-q05",
+      "scenario": "Each command in a pipeline runs in its own subshell. Prove this by showing a variable set inside a while-read loop doesn't persist.",
+      "question": "Echo 'test' into a pipe to a while loop that sets VAR=set, then print $VAR outside — show it's empty.",
+      "description": "In bash, each element of a pipeline runs in a subshell by default. This is a notorious gotcha: variables set inside a while-read pipeline loop are NOT visible after the pipe. Use process substitution or lastpipe option as workarounds.",
+      "use_cases": ["Debug 'why is my loop variable empty' bugs", "Understand pipeline subshell scoping", "Know when to use process substitution instead of pipes"],
+      "hints": ["echo 'test' | while read line; do VAR=set; done", "Then echo $VAR — it should be empty", "Run: echo 'test' | while read line; do VAR=set; done; echo \"VAR=$VAR\""],
+      "validation": { "type": "output_match", "command": "echo 'test' | while read line; do VAR=set; done; echo \"VAR=$VAR\"", "pattern": "VAR=$" }
+    }
+  ]
+}

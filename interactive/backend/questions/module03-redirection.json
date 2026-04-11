@@ -1,0 +1,60 @@
+{
+  "slug": "module03-redirection",
+  "name": "Redirection",
+  "questions": [
+    {
+      "id": "m03-q01",
+      "scenario": "Your health check script produces output that must be saved to a log file for the on-call operator to review later.",
+      "question": "Write the output of 'echo HEALTH CHECK OK' to /tmp/health.log (overwrite if it exists).",
+      "description": "> redirects stdout to a file, overwriting it. Every shell has three standard streams: stdin (0), stdout (1), stderr (2). > is shorthand for 1>.",
+      "use_cases": ["Save script output to a log file", "Create a file with specific content", "Reset a log file at the start of each run"],
+      "hints": ["Use the > operator after the command", "It goes: command > filename", "Run: echo 'HEALTH CHECK OK' > /tmp/health.log"],
+      "validation": { "type": "file_not_empty", "path": "/tmp/health.log" }
+    },
+    {
+      "id": "m03-q02",
+      "scenario": "The health check runs every minute. Each result must be appended to the log, not overwrite it.",
+      "question": "Append 'CHECK COMPLETE' to /tmp/health.log without overwriting existing content.",
+      "description": ">> appends to a file instead of overwriting. If the file doesn't exist, >> creates it. Critical distinction from > in any logging script.",
+      "use_cases": ["Append entries to a rotating log", "Add to an existing config file", "Accumulate results across multiple script runs"],
+      "hints": ["The append operator is >> (double greater-than)", "Run: echo 'CHECK COMPLETE' >> /tmp/health.log"],
+      "validation": { "type": "file_contains", "path": "/tmp/health.log", "pattern": "CHECK COMPLETE" }
+    },
+    {
+      "id": "m03-q03",
+      "scenario": "A backup script is producing errors you need to capture separately while discarding normal output.",
+      "question": "Run './scripts/backup.sh' sending stderr to /tmp/errors.log and discarding stdout.",
+      "description": "2> redirects stderr (stream 2) to a file. > /dev/null silently discards stdout. /dev/null is a special file that swallows everything written to it.",
+      "use_cases": ["Capture only errors from noisy scripts", "Suppress cron job stdout while preserving errors", "Separate error logs from regular output"],
+      "hints": ["Stderr is stream 2, redirect it with 2>", "Discard stdout with > /dev/null", "Run: ./scripts/backup.sh > /dev/null 2>/tmp/errors.log"],
+      "validation": { "type": "file_exists", "path": "/tmp/errors.log" }
+    },
+    {
+      "id": "m03-q04",
+      "scenario": "You need to capture everything from a script — both stdout and stderr — into one combined log file.",
+      "question": "Run 'ls /home/student /nonexistent' and redirect both stdout AND stderr to /tmp/combined.log.",
+      "description": "2>&1 redirects stderr into wherever stdout is currently going. Order matters: > file 2>&1 sends both to file. The reverse order (2>&1 > file) only redirects stderr to the original stdout.",
+      "use_cases": ["Capture all output from a cron job", "Log complete script output including errors", "Debug a script by capturing everything"],
+      "hints": ["First redirect stdout to the file with >", "Then redirect stderr to stdout with 2>&1", "Run: ls /home/student /nonexistent > /tmp/combined.log 2>&1"],
+      "validation": { "type": "file_not_empty", "path": "/tmp/combined.log" }
+    },
+    {
+      "id": "m03-q05",
+      "scenario": "A monitoring script runs a noisy command. You need it to run silently — no output at all, stdout or stderr.",
+      "question": "Run 'ls /home/student' discarding ALL output (both stdout and stderr).",
+      "description": "/dev/null is the null device — it discards everything. Redirecting both streams here gives you a completely silent command execution, useful in scripts where output would pollute logs.",
+      "use_cases": ["Silent background health checks", "Suppress expected errors from commands used for their exit code", "Run commands in cron without email spam"],
+      "hints": ["Send stdout to /dev/null with > /dev/null", "Then redirect stderr there too with 2>&1", "Run: ls /home/student > /dev/null 2>&1"],
+      "validation": { "type": "exit_code", "command": "ls /home/student > /dev/null 2>&1", "expected": 0 }
+    },
+    {
+      "id": "m03-q06",
+      "scenario": "You need to feed text directly into a command without creating a temporary file.",
+      "question": "Use a here-string to count the words in the string 'reactor block alpha online'.",
+      "description": "<<< (here-string) feeds a string directly into a command's stdin. It's cleaner than echo 'text' | command because it avoids spawning a subshell for echo.",
+      "use_cases": ["Feed a config value into a parsing command", "Test a command with specific input without creating files", "Pass a single-line string to read or awk"],
+      "hints": ["The operator is <<< (three less-than signs)", "Put the string after <<<", "Run: wc -w <<< 'reactor block alpha online'"],
+      "validation": { "type": "output_match", "command": "wc -w <<< 'reactor block alpha online'", "pattern": "^\\s*4\\s*$" }
+    }
+  ]
+}

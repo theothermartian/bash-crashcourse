@@ -1,0 +1,51 @@
+{
+  "slug": "module02-pipes",
+  "name": "Pipes & Chaining",
+  "questions": [
+    {
+      "id": "m02-q01",
+      "scenario": "You need to know how many files are in /home/student. Counting by eye isn't an option in production.",
+      "question": "Count the number of files and directories in /home/student using a pipe.",
+      "description": "The pipe | sends stdout of one command directly into stdin of the next. ls | wc -l counts lines of output. This is the foundation of the Unix philosophy: small tools chained together.",
+      "use_cases": ["Count log entries", "Count processes matching a name", "Measure output size before processing"],
+      "hints": ["ls lists files, wc -l counts lines", "Connect them with a pipe character |", "Run: ls /home/student | wc -l"],
+      "validation": { "type": "output_match", "command": "ls /home/student | wc -l", "pattern": "^[0-9]+$" }
+    },
+    {
+      "id": "m02-q02",
+      "scenario": "You want to create a directory and immediately move into it. Both must succeed — if mkdir fails, don't cd.",
+      "question": "Create /tmp/workdir and change into it, ensuring the second command only runs if the first succeeds.",
+      "description": "&& (AND) runs the right side only if the left side exits 0 (success). || (OR) runs the right side only on failure. These are fundamental for safe command chaining in scripts.",
+      "use_cases": ["Stop a deploy if tests fail", "Only backup if the source exists", "Run cleanup only on success"],
+      "hints": ["You need && between the two commands", "mkdir first, then cd", "Run: mkdir -p /tmp/workdir && cd /tmp/workdir"],
+      "validation": { "type": "file_exists", "path": "/tmp/workdir" }
+    },
+    {
+      "id": "m02-q03",
+      "scenario": "You need to know which log levels appear most often in /home/student/logs/app.log — ERROR, WARN, or INFO.",
+      "question": "Show a frequency count of log levels, highest first, using the frequency idiom on /home/student/logs/app.log.",
+      "description": "sort | uniq -c | sort -rn is the frequency idiom. First sort groups identical lines together, uniq -c counts consecutive duplicates, then sort -rn ranks by count descending. You'll use this daily.",
+      "use_cases": ["Find most common error types", "Rank most active users in access logs", "Count API endpoint usage frequency"],
+      "hints": ["Extract the level field first with grep -oE '(INFO|WARN|ERROR)'", "Then pipe into: sort | uniq -c | sort -rn", "Run: grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn"],
+      "validation": { "type": "output_contains", "command": "grep -oE 'INFO|WARN|ERROR' /home/student/logs/app.log | sort | uniq -c | sort -rn", "substring": "INFO" }
+    },
+    {
+      "id": "m02-q04",
+      "scenario": "A monitoring script needs to display disk usage AND write it to a log file at the same time.",
+      "question": "Run 'df -h /' and send output to both the terminal and /tmp/disk.log simultaneously.",
+      "description": "tee reads from stdin and writes to both stdout AND a file simultaneously. It's essential when you need to see output in real-time while also saving it.",
+      "use_cases": ["Log script output while watching it live", "Save command output while displaying it in a pipeline", "Duplicate a stream for dual consumption"],
+      "hints": ["The command is tee, placed at the end of a pipe", "tee takes a filename as argument", "Run: df -h / | tee /tmp/disk.log"],
+      "validation": { "type": "file_not_empty", "path": "/tmp/disk.log" }
+    },
+    {
+      "id": "m02-q05",
+      "scenario": "You have a list of process names in /home/student/data/processes.txt and need to pass each one as an argument to echo (simulating a command per line).",
+      "question": "Use xargs to run 'echo PROCESS:' before each line from /home/student/data/processes.txt.",
+      "description": "xargs reads lines from stdin and passes them as arguments to a command. It bridges commands that produce output with commands that need arguments — not all commands accept stdin.",
+      "use_cases": ["Run a command on each file found by find", "Delete a list of files", "Apply an operation to each result from grep"],
+      "hints": ["Pipe the file contents into xargs", "xargs passes each line as an argument to the command", "Run: cat /home/student/data/processes.txt | xargs -I{} echo 'PROCESS: {}'"],
+      "validation": { "type": "output_contains", "command": "cat /home/student/data/processes.txt | xargs -I{} echo 'PROCESS: {}'", "substring": "PROCESS:" }
+    }
+  ]
+}

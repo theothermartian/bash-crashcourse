@@ -1,0 +1,42 @@
+{
+  "slug": "module13-case-statements",
+  "name": "Case Statements",
+  "questions": [
+    {
+      "id": "m13-q01",
+      "scenario": "A script handles three environment names: prod, staging, and dev. Each gets a different log level.",
+      "question": "Write a case statement that prints LOG_LEVEL=ERROR for 'prod', WARN for 'staging', DEBUG for 'dev'.",
+      "description": "case matches a value against patterns. Each pattern ends with ). Multiple patterns separate with |. Each arm ends with ;;. Default catch-all is *). Cleaner than long if/elif chains for discrete values.",
+      "use_cases": ["Branch on environment name", "Handle different command-line subcommands", "Map input values to config settings"],
+      "hints": ["Syntax: case $VAR in pattern) ... ;; esac", "Each branch ends with ;;", "Run: ENV=prod; case $ENV in prod) echo LOG_LEVEL=ERROR;; staging) echo LOG_LEVEL=WARN;; dev) echo LOG_LEVEL=DEBUG;; esac"],
+      "validation": { "type": "output_match", "command": "ENV=prod; case $ENV in prod) echo LOG_LEVEL=ERROR;; staging) echo LOG_LEVEL=WARN;; dev) echo LOG_LEVEL=DEBUG;; esac", "pattern": "LOG_LEVEL=ERROR" }
+    },
+    {
+      "id": "m13-q02",
+      "scenario": "A CLI script accepts 'start', 'stop', or 'restart' as subcommands. Anything else should print usage.",
+      "question": "Write a case with a wildcard *) that catches unknown commands and prints 'Unknown command'.",
+      "description": "*) is the catch-all (default) arm in a case statement. If no earlier pattern matched, *) fires. Essential for user-facing scripts to give helpful error messages for invalid input.",
+      "use_cases": ["CLI subcommand dispatching", "Input validation with helpful error messages", "Providing defaults for unexpected values"],
+      "hints": ["Add *) at the end as the catch-all", "CMD=explode won't match start/stop/restart", "Run: CMD=explode; case $CMD in start) echo starting;; stop) echo stopping;; restart) echo restarting;; *) echo 'Unknown command';; esac"],
+      "validation": { "type": "output_match", "command": "CMD=explode; case $CMD in start) echo starting;; stop) echo stopping;; *) echo 'Unknown command';; esac", "pattern": "Unknown command" }
+    },
+    {
+      "id": "m13-q03",
+      "scenario": "A script accepts both '-h' and '--help' flags. Match both with a single case arm.",
+      "question": "Use | to match both '-h' and '--help' in one case arm that prints 'Showing help'.",
+      "description": "Pattern | pattern matches either pattern in a single arm. This avoids duplicating the same action in two arms. Common for short/long flag pairs, multiple spellings, or multiple valid inputs.",
+      "use_cases": ["Handle both -h and --help flags", "Accept multiple spellings: 'yes|y|Y'", "Match related values without duplication"],
+      "hints": ["Separate patterns with | inside one arm", "Syntax: pat1|pat2) ... ;;", "Run: FLAG=--help; case $FLAG in -h|--help) echo 'Showing help';; esac"],
+      "validation": { "type": "output_match", "command": "FLAG=--help; case $FLAG in -h|--help) echo 'Showing help';; esac", "pattern": "Showing help" }
+    },
+    {
+      "id": "m13-q04",
+      "scenario": "Case patterns support globs. Match any .log file and any .sql file with different messages.",
+      "question": "Write a case that matches '*.log' files with 'log file' and '*.sql' files with 'sql file'. Test with 'app.log'.",
+      "description": "case patterns are glob patterns, not regex. *.log, [0-9]*, reactor-? are all valid. This makes case useful for routing based on filename extensions, prefixes, or patterns without needing grep.",
+      "use_cases": ["Route different file types to different handlers", "Match hostnames by prefix", "Process log vs data files differently"],
+      "hints": ["*.log is a glob pattern in case", "Test FILENAME=app.log", "Run: FILENAME=app.log; case $FILENAME in *.log) echo 'log file';; *.sql) echo 'sql file';; *) echo 'unknown';; esac"],
+      "validation": { "type": "output_match", "command": "FILENAME=app.log; case $FILENAME in *.log) echo 'log file';; *.sql) echo 'sql file';; *) echo 'unknown';; esac", "pattern": "log file" }
+    }
+  ]
+}

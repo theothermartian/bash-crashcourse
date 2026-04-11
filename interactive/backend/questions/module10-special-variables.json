@@ -1,0 +1,51 @@
+{
+  "slug": "module10-special-variables",
+  "name": "Special Variables",
+  "questions": [
+    {
+      "id": "m10-q01",
+      "scenario": "A script ran a command. You must check whether it succeeded before proceeding.",
+      "question": "Run 'ls /home/student' then immediately print its exit code using the special variable for it.",
+      "description": "$? holds the exit code of the most recently executed command. 0 = success. Any non-zero = failure. Must be read immediately — the next command overwrites it.",
+      "use_cases": ["Check if a backup command succeeded", "Conditional logic based on command result", "Log exit codes for audit trails"],
+      "hints": ["The variable is $?", "Read it immediately after the command", "Run: ls /home/student; echo \"Exit code: $?\""],
+      "validation": { "type": "output_match", "command": "ls /home/student; echo \"Exit: $?\"", "pattern": "Exit: 0" }
+    },
+    {
+      "id": "m10-q02",
+      "scenario": "A script needs to write its PID to a lockfile so another instance can detect it's already running.",
+      "question": "Print the current shell's PID using the appropriate special variable.",
+      "description": "$$ is the PID of the current shell process. Essential for creating unique lockfiles (lockfile.$$), temp files that don't collide, and logging which process produced a message.",
+      "use_cases": ["Create unique temp files: /tmp/script.$$", "Write PID files for daemon scripts", "Identify which script instance produced a log line"],
+      "hints": ["The special variable for current PID is $$", "Just echo it", "Run: echo \"My PID: $$\""],
+      "validation": { "type": "output_match", "command": "echo \"My PID: $$\"", "pattern": "My PID: [0-9]+" }
+    },
+    {
+      "id": "m10-q03",
+      "scenario": "A script expects exactly 2 arguments. It must validate this at startup.",
+      "question": "Write a one-liner that prints the number of arguments when called as: bash -c 'echo $#' -- arg1 arg2.",
+      "description": "$# is the count of positional arguments passed to the script or function. Scripts should check $# at the top to validate they received the right number of arguments.",
+      "use_cases": ["Validate argument count at script startup", "Provide usage messages when called incorrectly", "Branch logic based on how many arguments were given"],
+      "hints": ["$# is the argument count special variable", "Run it inside bash -c to pass test args", "Run: bash -c 'echo \"Args: $#\"' -- arg1 arg2"],
+      "validation": { "type": "output_match", "command": "bash -c 'echo \"Args: $#\"' -- arg1 arg2", "pattern": "Args: 2" }
+    },
+    {
+      "id": "m10-q04",
+      "scenario": "A script loops over all its arguments. You must use the right special variable to preserve multi-word arguments correctly.",
+      "question": "Use \"$@\" to iterate over the arguments 'alpha' 'beta gamma' 'delta' and print each on a line.",
+      "description": "\"$@\" expands to each positional argument as a separate word, preserving quoting. \"$*\" joins all args with $IFS[0]. Always use \"$@\" in loops — \"$*\" destroys multi-word argument boundaries.",
+      "use_cases": ["Forward all arguments to another command safely", "Process each argument individually in a loop", "Preserve filenames with spaces when passing arguments around"],
+      "hints": ["\"$@\" preserves each argument as a separate element", "Use a for loop: for arg in \"$@\"", "Run: bash -c 'for a in \"$@\"; do echo \"$a\"; done' -- alpha 'beta gamma' delta"],
+      "validation": { "type": "output_contains", "command": "bash -c 'for a in \"$@\"; do echo \"$a\"; done' -- alpha 'beta gamma' delta", "substring": "beta gamma" }
+    },
+    {
+      "id": "m10-q05",
+      "scenario": "A script needs to generate a random port number between 1024 and 65535 for a test service.",
+      "question": "Use $RANDOM to generate a number between 1024 and 65535.",
+      "description": "$RANDOM returns a random integer between 0 and 32767 each time it's referenced. Use arithmetic to scale it. Not cryptographically secure — use /dev/urandom for security-sensitive randomness.",
+      "use_cases": ["Generate random test port numbers", "Add random delays to avoid thundering herd", "Pick a random element from a list in tests"],
+      "hints": ["$RANDOM gives 0-32767", "Use $(( 1024 + RANDOM % 64511 )) to scale into range", "Run: echo $(( 1024 + RANDOM % 64511 ))"],
+      "validation": { "type": "output_match", "command": "echo $(( 1024 + RANDOM % 64511 ))", "pattern": "^[0-9]+$" }
+    }
+  ]
+}
