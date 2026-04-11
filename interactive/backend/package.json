@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node tests/question-bank.test.js && node tests/quiz-engine.test.js",
+    "test:bank": "node tests/question-bank.test.js",
+    "test:engine": "node tests/quiz-engine.test.js"
   },
   "dependencies": {
     "dockerode": "^4.0.2",

@@ -8,7 +8,7 @@
       "question": "Count the number of lines containing 'ERROR' in /home/student/logs/app.log.",
       "description": "grep -c counts matching lines (not occurrences — if a line has two ERRORs, it counts as 1). grep -v inverts the match. grep -i is case-insensitive. grep -E enables extended regex.",
       "use_cases": ["Count error frequency in logs", "Alert if error count exceeds threshold", "Summarise log quality at a glance"],
-      "hints": ["grep -c counts matching lines", "Run: grep -c 'ERROR' /home/student/logs/app.log"],
+      "hints": ["grep -c counts matching lines (not occurrences)", "The pattern goes in single quotes after grep -c", "Run: grep -c 'ERROR' /home/student/logs/app.log"],
       "validation": { "type": "output_match", "command": "grep -c 'ERROR' /home/student/logs/app.log", "pattern": "^[0-9]+$" }
     },
     {

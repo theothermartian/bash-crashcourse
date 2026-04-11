@@ -17,7 +17,7 @@
       "question": "Append 'CHECK COMPLETE' to /tmp/health.log without overwriting existing content.",
       "description": ">> appends to a file instead of overwriting. If the file doesn't exist, >> creates it. Critical distinction from > in any logging script.",
       "use_cases": ["Append entries to a rotating log", "Add to an existing config file", "Accumulate results across multiple script runs"],
-      "hints": ["The append operator is >> (double greater-than)", "Run: echo 'CHECK COMPLETE' >> /tmp/health.log"],
+      "hints": ["The append operator is >> (double greater-than)", "Unlike >, >> does not truncate the file first", "Run: echo 'CHECK COMPLETE' >> /tmp/health.log"],
       "validation": { "type": "file_contains", "path": "/tmp/health.log", "pattern": "CHECK COMPLETE" }
     },
     {
