@@ -54,6 +54,9 @@ parse_args() {
   [[ -n "$db_type" ]] || die "--db-type is required"
   [[ -n "$db_name" ]] || die "--db-name is required"
 
+  # Validate db_name contains only safe characters (prevent path traversal)
+  [[ "$db_name" =~ ^[a-zA-Z0-9_-]+$ ]] || die "Invalid database name: only alphanumeric, underscore, and hyphen allowed"
+
   # Validate db_type is one of the supported options
   case "$db_type" in
     postgres|mysql)
@@ -79,8 +82,9 @@ run_backup() {
   # Perform backup based on database type
   case "$db_type" in
     postgres)
-      # Verify PGPASSWORD is set
+      # Verify PGPASSWORD is set and not entirely whitespace
       [[ -n "${PGPASSWORD:-}" ]] || die "PGPASSWORD environment variable is not set"
+      [[ -n "${PGPASSWORD// /}" ]] || die "PGPASSWORD environment variable must not be blank"
 
       # Run pg_dump and redirect to backup file
       pg_dump -U postgres "$db_name" > "$backup_file" || die "pg_dump failed for database: $db_name"
@@ -89,8 +93,17 @@ run_backup() {
       # Verify MYSQL_PASS is set
       [[ -n "${MYSQL_PASS:-}" ]] || die "MYSQL_PASS environment variable is not set"
 
-      # Run mysqldump with password and redirect to backup file
-      mysqldump -u root -p"${MYSQL_PASS}" "$db_name" > "$backup_file" || die "mysqldump failed for database: $db_name"
+      # Write password to a temporary defaults file to avoid exposing it in the process list
+      local defaults_file
+      defaults_file=$(mktemp)
+      chmod 600 "$defaults_file"
+      printf '[client]\npassword=%s\n' "${MYSQL_PASS}" > "$defaults_file"
+
+      # Run mysqldump using the defaults file and clean up the temp file afterwards
+      mysqldump --defaults-extra-file="$defaults_file" -u root "$db_name" > "$backup_file"
+      local exit_code=$?
+      rm -f "$defaults_file"
+      [[ $exit_code -eq 0 ]] || die "mysqldump failed for database: $db_name"
       ;;
     *)
       die "Unknown database type: $db_type"

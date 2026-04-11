@@ -77,7 +77,7 @@ function renderHint(data) {
   const display = document.getElementById('hint-display');
   const box = document.createElement('div');
   box.className = 'hint-box';
-  box.innerHTML = `<div class="hint-meta">Hint ${data.index} of ${data.total}</div>${escapeHtml(data.text)}`;
+  box.innerHTML = `<div class="hint-meta">Hint ${escapeHtml(String(data.index))} of ${escapeHtml(String(data.total))}</div>${escapeHtml(data.text)}`;
   display.appendChild(box);
   display.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }

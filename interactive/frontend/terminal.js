@@ -82,29 +82,9 @@ window.addEventListener('resize', () => {
   wsSend({ type: 'resize', cols: term.cols, rows: term.rows });
 });
 
-// Forward keystrokes to backend as binary
+// Forward keystrokes verbatim to the backend as a raw string.
+// The backend uses Buffer.from(msg.data, 'binary') to write to the container stdin.
 term.onData((data) => {
-  wsSend({ type: 'input', data: btoa(data) });
-});
-
-// Override onData to send raw binary (not base64)
-// Actually send as-is since server expects binary string
-// Re-wire: send raw string (server reads it as binary)
-term.onData((data) => {}); // remove default (already set above, just overwrite)
-
-// Final version — send data as-is (server uses Buffer.from(msg.data, 'binary'))
-term.onData = null; // xterm doesn't support removing, so we re-open cleanly
-
-// ---------------------------------------------------------------------------
-// Clean terminal input forwarding
-// ---------------------------------------------------------------------------
-
-// xterm.js onData fires for every character/sequence the user types.
-// We forward it verbatim to the backend as a 'binary' string.
-// The backend sends it to the container stdin.
-
-const _origOnData = term.onData.bind(term);
-_origOnData((data) => {
   if (wsReady) {
     ws.send(JSON.stringify({ type: 'input', data }));
   }

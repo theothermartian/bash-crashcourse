@@ -64,7 +64,6 @@ Module._load = function(request, parent, isMain) {
       createContainer:  async () => ({}),
       destroyContainer: async () => {},
       execCheck: async () => mockExecResult,
-      isBlocked: () => false,
     };
   }
   return _origLoad.apply(this, arguments);
@@ -250,7 +249,6 @@ async function run() {
               ? { stdout: 'OK', exitCode: 0 }
               : { stdout: '', exitCode: 1 };
           },
-          isBlocked: () => false,
         };
       }
       return origLoad.apply(this, arguments);

@@ -4,10 +4,11 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { WebSocketServer } = require('ws');
-const { createContainer, destroyContainer, isBlocked } = require('./container-manager');
+const { createContainer, destroyContainer } = require('./container-manager');
 const { QuizEngine } = require('./quiz-engine');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const MAX_SESSIONS = 10;
 const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 const VALIDATION_DELAY_MS = 700; // wait for shell to settle before validating
 
@@ -47,6 +48,12 @@ const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws, req) => {
   console.log(`[session] new connection from ${req.socket.remoteAddress}`);
+
+  if (wss.clients.size > MAX_SESSIONS) {
+    send(ws, { type: 'error', message: 'Server is at capacity. Please try again later.' });
+    ws.close();
+    return;
+  }
 
   let container  = null;
   let termStream = null;          // raw duplex to the container TTY
@@ -106,6 +113,7 @@ wss.on('connection', (ws, req) => {
       case 'input': {
         // Raw keystroke from xterm — forward to container stdin
         if (!termStream) return;
+        if (typeof msg.data !== 'string') return;
 
         const data = Buffer.from(msg.data, 'binary');
         const char = data.toString('utf8');
@@ -115,14 +123,8 @@ wss.on('connection', (ws, req) => {
           const cmd = lastCmd.trim();
           lastCmd = '';
 
-          if (cmd && isBlocked(cmd)) {
-            send(ws, { type: 'blocked', message: 'Command blocked for safety.' });
-            // Still forward a newline so the prompt returns
-            termStream.write('\r');
-            return;
-          }
-
           // Forward Enter to container
+          // (No denylist check — the Docker sandbox is the security boundary)
           termStream.write('\r');
 
           // Schedule validation after shell settles
@@ -172,8 +174,9 @@ wss.on('connection', (ws, req) => {
       }
 
       case 'resize': {
-        const { cols, rows } = msg;
-        if (container && cols && rows) {
+        const cols = parseInt(msg.cols, 10);
+        const rows = parseInt(msg.rows, 10);
+        if (container && cols >= 1 && cols <= 500 && rows >= 1 && rows <= 200) {
           container.resize({ w: cols, h: rows }).catch(() => {});
         }
         break;

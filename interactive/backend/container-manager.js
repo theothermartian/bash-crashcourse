@@ -4,16 +4,15 @@ const Docker = require('dockerode');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
-const RUNNER_IMAGE = process.env.RUNNER_IMAGE || 'bash-crashcourse-runner';
+const RUNNER_IMAGE = process.env.RUNNER_IMAGE || 'bash-lab';
 
-// Commands that are too dangerous even in isolated containers
-const BLOCKED_PATTERNS = [
-  /rm\s+-rf\s+\/(?:\s|$)/,          // rm -rf /
-  /:\(\)\s*\{\s*:\s*\|\s*:&\s*\}/,  // fork bomb
-  /dd\s+if=\/dev\/(?:zero|random)/,  // disk wipe
-  /mkfs\./,                          // format filesystem
-  />\s*\/dev\/(?:sda|sdb|nvme)/,     // write to block device
-];
+// NOTE: A regex denylist for dangerous shell commands was intentionally removed.
+// Denylists are trivially bypassed with whitespace variations, escape characters,
+// variable expansion, quoting, or encoding tricks (e.g. "rm   -rf  /" or
+// "$(rm) -rf /" or `r\m -rf /`). They provide false security.
+// Real protection comes from the Docker container sandbox: each session runs in an
+// isolated, ephemeral container with no network, hard memory/CPU limits, and a
+// PID limit to prevent fork bombs at the OS level.
 
 /**
  * Spawn a fresh Alpine runner container for one student session.
@@ -37,6 +36,7 @@ async function createContainer() {
       CpuQuota: 50000,             // 0.5 CPU
       NetworkMode: 'none',         // no external network
       AutoRemove: true,            // destroy on stop
+      PidsLimit: 100,              // prevent fork bombs at OS level
     },
     WorkingDir: '/home/student',
   });
@@ -52,7 +52,14 @@ async function destroyContainer(container) {
   try {
     await container.stop({ t: 2 });
   } catch (_) {
-    try { await container.kill(); } catch (_2) { /* already gone */ }
+    console.error('[destroyContainer] stop failed, trying kill:', _.message);
+    try { await container.kill(); } catch (_2) {
+      if (_2.statusCode === 404 || (_2.message && _2.message.includes('No such container'))) {
+        // already gone — suppress
+      } else {
+        console.error('[destroyContainer] kill also failed:', _2.message);
+      }
+    }
   }
 }
 
@@ -123,11 +130,8 @@ function demux(buf) {
   return out;
 }
 
-/**
- * Return true if the command matches a known dangerous pattern.
- */
-function isBlocked(cmd) {
-  return BLOCKED_PATTERNS.some((p) => p.test(cmd));
-}
+// isBlocked() was removed. Regex denylists cannot reliably block dangerous shell
+// commands and give a false sense of security. The container sandbox (resource
+// limits, no network, PID cap) is the authoritative protection layer.
 
-module.exports = { createContainer, destroyContainer, execCheck, isBlocked };
+module.exports = { createContainer, destroyContainer, execCheck };
