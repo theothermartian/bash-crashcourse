@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Session memory (local tooling, not course content)
+.remember/

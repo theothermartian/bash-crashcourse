@@ -141,7 +141,6 @@ wss.on('connection', (ws, req) => {
                     if (quiz.isFinished()) {
                       send(ws, { type: 'finished', score: quiz.moduleComplete() });
                     } else {
-                      const prevMod  = quiz.modules[quiz.moduleIdx - (quiz.questionIdx === 0 ? 1 : 0)];
                       const crossedModule = quiz.questionIdx === 0 && quiz.moduleIdx > 0;
                       if (crossedModule) {
                         send(ws, { type: 'module_complete', data: quiz.moduleComplete() });
